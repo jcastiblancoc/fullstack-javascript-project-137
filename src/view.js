@@ -1,4 +1,5 @@
 import onChange from 'on-change';
+import { t } from './i18n.js';
 
 // Application state
 const initialState = {
@@ -63,10 +64,10 @@ const renderSubmitButton = (state) => {
 
   if (state.form.isSubmitting) {
     submitButton.disabled = true;
-    submitButton.textContent = 'Procesando...';
+    submitButton.textContent = t('app.form.processing');
   } else {
     submitButton.disabled = false;
-    submitButton.textContent = 'Agregar RSS';
+    submitButton.textContent = t('app.form.submitButton');
   }
 };
 
@@ -105,20 +106,23 @@ const renderFeed = (url, data) => {
   const { feedsContainer } = elements;
   if (!feedsContainer) return;
   
+  const hostname = new URL(url).hostname;
+  const addedDate = new Date().toLocaleString();
+  
   const feedElement = document.createElement('div');
   feedElement.className = 'card mb-3';
   feedElement.innerHTML = `
     <div class="card-body">
-      <h5 class="card-title">Feed RSS de ${new URL(url).hostname}</h5>
+      <h5 class="card-title">${t('app.feed.title', { hostname })}</h5>
       <p class="card-text">
-        <small class="text-muted">URL: ${url}</small><br>
-        <small class="text-muted">Agregado: ${new Date().toLocaleString()}</small>
+        <small class="text-muted">${t('app.feed.url', { url })}</small><br>
+        <small class="text-muted">${t('app.feed.added', { date: addedDate })}</small>
       </p>
       <div class="mt-2">
-        <span class="badge bg-success">Activo</span>
+        <span class="badge bg-success">${t('app.feed.status')}</span>
       </div>
       <details class="mt-2">
-        <summary>Ver contenido del feed</summary>
+        <summary>${t('app.feed.viewContent')}</summary>
         <pre class="mt-2 p-2 bg-light border rounded" style="max-height: 200px; overflow-y: auto; font-size: 0.8em;">${data.slice(0, 500)}...</pre>
       </details>
     </div>

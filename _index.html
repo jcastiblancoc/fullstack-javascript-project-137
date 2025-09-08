@@ -10,8 +10,17 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h1 class="card-title mb-0">RSS Aggregator</h1>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                🌐 ES
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                                <li><a class="dropdown-item" href="#" data-lang="es">🇪🇸 Español</a></li>
+                                <li><a class="dropdown-item" href="#" data-lang="en">🇺🇸 English</a></li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="card-body">
                         <form id="rss-form" novalidate>

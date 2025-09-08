@@ -1,7 +1,7 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const path = require('path');
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import path from 'path';
 
-module.exports = {
+export default {
   entry: './src/index.js',
   output: {
     filename: 'bundle.js',
@@ -22,7 +22,7 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env'],
-            plugins: ['@babel/plugin-transform-modules-commonjs']
+            sourceType: 'module'
           }
         }
       },
@@ -30,6 +30,10 @@ module.exports = {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
       },
+      {
+        test: /\.json$/,
+        type: 'json'
+      }
     ],
   },
   devServer: {

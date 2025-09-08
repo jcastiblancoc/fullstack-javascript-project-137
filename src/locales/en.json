@@ -1,0 +1,35 @@
+{
+  "app": {
+    "title": "RSS Aggregator",
+    "form": {
+      "urlLabel": "RSS URL",
+      "urlPlaceholder": "https://example.com/rss",
+      "urlHelp": "Enter the RSS feed URL you want to add",
+      "submitButton": "Add RSS",
+      "processing": "Processing..."
+    },
+    "feed": {
+      "title": "RSS Feed from {{hostname}}",
+      "url": "URL: {{url}}",
+      "added": "Added: {{date}}",
+      "status": "Active",
+      "viewContent": "View feed content"
+    },
+    "messages": {
+      "success": "RSS feed added successfully",
+      "error": {
+        "loadFeed": "Error loading RSS feed",
+        "generic": "An unexpected error occurred"
+      }
+    }
+  },
+  "validation": {
+    "required": "URL is required",
+    "invalidUrl": "Must be a valid URL",
+    "invalidProtocol": "URL must use HTTP or HTTPS protocol",
+    "duplicateUrl": "This URL has already been added",
+    "invalidRss": "URL is not a valid RSS feed",
+    "accessError": "Could not access the RSS feed",
+    "notRssContent": "URL does not appear to be a valid RSS feed"
+  }
+}
