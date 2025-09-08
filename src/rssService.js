@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { parseRSSFeed } from './rssParser.js';
+import { v4 as uuidv4 } from 'uuid';
 
 // RSS service for downloading and processing feeds
 export class RSSService {
@@ -117,21 +118,22 @@ export class RSSService {
             console.log('JSON response structure:', Object.keys(jsonResponse));
             return {
               feed: {
-                id: generateId(),
-                title: 'Test Feed',
+                id: uuidv4(),
+                title: 'Test RSS Feed',
                 description: 'Local test RSS feed',
+                link: url,
                 originalUrl: url
               },
               posts: [{
-                id: generateId(),
+                id: uuidv4(),
                 title: 'Test Post',
-                description: 'This is a test post',
-                link: 'https://example.com',
+                description: 'This is a test post from the local RSS file',
+                link: 'http://example.com/test-post',
                 pubDate: new Date().toISOString()
               }]
             };
           }
-        } catch (e) {
+        } catch {
           console.log('Not valid JSON either');
         }
       }

@@ -10,8 +10,9 @@ const initI18n = () => {
   return i18next
     .use(LanguageDetector)
     .init({
+      lng: 'es', // Set Spanish as default language
       fallbackLng: 'es',
-      debug: true, // Enable debug to see initialization issues
+      debug: false, // Disable debug for production
       
       // Language detection options
       detection: {

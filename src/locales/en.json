@@ -24,17 +24,17 @@
       "readMore": "Read more",
       "publishedOn": "Published on {{date}}",
       "by": "by {{author}}",
-      "preview": "Preview",
+      "preview": "Vista previa",
       "previewTitle": "Post Preview",
       "readFullArticle": "Read full article",
       "close": "Close",
       "markAsRead": "Mark as read"
     },
     "messages": {
-      "success": "RSS feed added successfully!",
-      "networkError": "Network error - unable to reach the feed server",
+      "success": "RSS loaded successfully",
+      "networkError": "Network error",
       "timeout": "Request timeout - server took too long to respond",
-      "invalidFormat": "Error parsing RSS feed - invalid format",
+      "invalidFormat": "The resource does not contain a valid RSS",
       "unexpectedError": "An unexpected error occurred",
       "newPosts": "{{count}} new posts found in {{feedTitle}}",
       "newPostsTitle": "New RSS Posts Available",
@@ -43,10 +43,10 @@
     }
   },
   "validation": {
-    "required": "URL is required",
-    "invalidUrl": "Must be a valid URL",
+    "required": "Must not be empty",
+    "invalidUrl": "The link must be a valid URL",
     "invalidProtocol": "URL must use HTTP or HTTPS protocol",
-    "duplicateUrl": "This URL has already been added",
+    "duplicateUrl": "RSS already exists",
     "invalidRss": "URL is not a valid RSS feed",
     "accessError": "Could not access the RSS feed",
     "notRssContent": "URL does not appear to be a valid RSS feed"

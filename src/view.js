@@ -2,70 +2,44 @@ import onChange from 'on-change';
 import { t } from './i18n.js';
 import { dataStore } from './dataStore.js';
 
-// Application state
-const initialState = {
-  form: {
-    url: '',
-    isValid: true,
-    errors: [],
-    isSubmitting: false
-  },
-  feeds: [],
-  posts: []
-};
-
 // DOM elements
-const elements = {
-  form: null,
-  urlInput: null,
-  submitButton: null,
-  feedsContainer: null
-};
+let elements = {};
 
 // Initialize DOM elements
 export const initElements = () => {
-  elements.form = document.getElementById('rss-form');
-  elements.urlInput = document.getElementById('rss-url');
-  elements.submitButton = elements.form?.querySelector('button[type="submit"]');
-  elements.feedsContainer = document.getElementById('feeds-container');
+  elements = {
+    form: document.getElementById('rss-form'),
+    urlInput: document.getElementById('rss-url'),
+    submitButton: document.querySelector('button[type="submit"]'),
+    feedsContainer: document.querySelector('.feeds')
+  };
 };
 
-// Render functions
-const renderFormValidation = (state) => {
+// Update form validation display
+const updateFormValidation = (state) => {
   const { urlInput } = elements;
-  if (!urlInput || !state || !state.form) return;
-
-  // Update input styling
-  urlInput.classList.remove('is-valid', 'is-invalid');
+  if (!urlInput) return;
   
   if (state.form.isValid) {
+    urlInput.classList.remove('is-invalid');
     urlInput.classList.add('is-valid');
   } else {
     urlInput.classList.remove('is-valid');
     urlInput.classList.add('is-invalid');
-  }
-
-  // Show/hide error messages
-  let feedbackElement = urlInput.parentElement.querySelector('.invalid-feedback');
-  
-  if (!state.form.isValid && state.form.errors && state.form.errors.length > 0) {
-    if (!feedbackElement) {
-      feedbackElement = document.createElement('div');
-      feedbackElement.className = 'invalid-feedback';
-      urlInput.parentElement.appendChild(feedbackElement);
+    
+    const feedback = urlInput.parentElement.querySelector('.invalid-feedback');
+    if (feedback && state.form.errors.length > 0) {
+      feedback.textContent = state.form.errors[0];
     }
-    feedbackElement.textContent = state.form.errors[0];
-    feedbackElement.style.display = 'block';
-  } else if (feedbackElement) {
-    feedbackElement.style.display = 'none';
   }
 };
 
-const renderSubmitButton = (state) => {
+// Update submit button state
+const updateSubmitButton = (isSubmitting) => {
   const { submitButton } = elements;
-  if (!submitButton || !state || !state.form) return;
+  if (!submitButton) return;
 
-  if (state.form.isSubmitting) {
+  if (isSubmitting) {
     submitButton.disabled = true;
     submitButton.textContent = t('app.form.processing');
   } else {
@@ -74,23 +48,8 @@ const renderSubmitButton = (state) => {
   }
 };
 
-const renderFormReset = (state) => {
-  const { urlInput } = elements;
-  if (!urlInput) return;
-
-  urlInput.value = '';
-  urlInput.classList.remove('is-valid', 'is-invalid');
-  
-  const feedbackElement = urlInput.parentElement.querySelector('.invalid-feedback');
-  if (feedbackElement) {
-    feedbackElement.style.display = 'none';
-  }
-  
-  urlInput.focus();
-};
-
 const renderAlert = (type, message) => {
-  const { feedsContainer } = elements;
+  const feedsContainer = document.querySelector('.feeds');
   if (!feedsContainer) return;
   
   const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
@@ -98,13 +57,26 @@ const renderAlert = (type, message) => {
   alertElement.className = `alert ${alertClass} alert-dismissible fade show`;
   alertElement.innerHTML = `
     ${message}
-    <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   `;
+  
+  // Remove any existing alerts
+  const existingAlerts = feedsContainer.querySelectorAll('.alert');
+  existingAlerts.forEach(alert => alert.remove());
+  
+  // Insert alert at the beginning of feeds container
   feedsContainer.insertBefore(alertElement, feedsContainer.firstChild);
+  
+  // Auto-dismiss after 5 seconds
+  setTimeout(() => {
+    if (alertElement.parentNode) {
+      alertElement.remove();
+    }
+  }, 5000);
 };
 
 const renderFeed = (feedData, postsData = []) => {
-  const { feedsContainer } = elements;
+  const feedsContainer = document.querySelector('.feeds');
   if (!feedsContainer) return;
   
   const addedDate = new Date(feedData.addedAt).toLocaleString();
@@ -182,22 +154,25 @@ const renderPosts = (posts) => {
 
 // Create watched state
 export const createWatchedState = () => {
-  return onChange(initialState, (path, value, previousValue) => {
+  const state = {
+    form: {
+      isValid: true,
+      errors: [],
+      isSubmitting: false
+    }
+  };
+
+  return onChange(state, (path, value) => {
     console.log('State changed:', path, value);
     
-    switch (path) {
-      case 'form.isValid':
-      case 'form.errors':
-        renderFormValidation(onChange.target);
-        break;
-      case 'form.isSubmitting':
-        renderSubmitButton(onChange.target);
-        break;
-      case 'form.url':
-        if (value === '') {
-          renderFormReset(onChange.target);
-        }
-        break;
+    // Handle form validation state changes
+    if (path === 'form.isValid' || path === 'form.errors') {
+      updateFormValidation(state);
+    }
+    
+    // Handle form submission state
+    if (path === 'form.isSubmitting') {
+      updateSubmitButton(value);
     }
   });
 };

@@ -40,12 +40,12 @@ export const createRssUrlSchema = (t) => {
 };
 
 // Legacy functions - now handled by dataStore
-export const addFeedToStore = (url) => {
+export const addFeedToStore = () => {
   // This is now handled by dataStore.addFeed()
   console.warn('addFeedToStore is deprecated, use dataStore.addFeed()');
 };
 
-export const removeFeedFromStore = (url) => {
+export const removeFeedFromStore = () => {
   // This is now handled by dataStore.removeFeed()
   console.warn('removeFeedFromStore is deprecated, use dataStore.removeFeed()');
 };

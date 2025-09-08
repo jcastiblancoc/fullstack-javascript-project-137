@@ -6,8 +6,6 @@ import { createRssUrlSchema } from './validation.js';
 import { initElements, createWatchedState, showError, showSuccess, displayFeed } from './view.js';
 import { rssService } from './rssService.js';
 import { dataStore } from './dataStore.js';
-import { RSSService } from './rssService.js';
-import { i18n } from './i18n.js';
 import { feedUpdater } from './feedUpdater.js';
 
 // Initialize the application
@@ -133,19 +131,16 @@ const initApp = async () => {
         watchedState.form.errors = error.errors;
       } else {
         // Network, parsing, or other errors
-        let errorMessage = t('app.messages.error.generic');
+        let errorMessage = t('app.messages.unexpectedError');
         
         if (error.message.includes('timeout') || error.message.includes('taking too long')) {
-          errorMessage = t('app.messages.error.timeout');
+          errorMessage = t('app.messages.timeout');
         } else if (error.message.includes('Network error') || error.message.includes('unable to reach')) {
-          errorMessage = t('app.messages.error.networkError');
-        } else if (error.message.includes('parsing') || error.message.includes('RSS')) {
-          errorMessage = t('app.messages.error.parseFeed');
+          errorMessage = t('app.messages.networkError');
+        } else if (error.message.includes('parsing') || error.message.includes('RSS') || error.message.includes('XML') || error.message.includes('HTML')) {
+          errorMessage = t('app.messages.invalidFormat');
         } else if (error.message.includes('server responded')) {
-          errorMessage = t('app.messages.error.loadFeed');
-        } else {
-          // Show the actual error message for debugging
-          errorMessage = `Error: ${error.message}`;
+          errorMessage = t('app.messages.networkError');
         }
         
         showError(errorMessage);
@@ -158,7 +153,6 @@ const initApp = async () => {
 
   // Language switcher functionality
   const languageDropdown = document.getElementById('languageDropdown');
-  const languageItems = document.querySelectorAll('[data-lang]');
   
   // Update UI texts when language changes
   const updateUITexts = () => {
@@ -171,14 +165,13 @@ const initApp = async () => {
     if (urlLabel) urlLabel.textContent = t('app.form.urlLabel');
     if (urlInput) urlInput.placeholder = t('app.form.urlPlaceholder');
     if (urlHelp) urlHelp.textContent = t('app.form.urlHelp');
-    if (submitButton && !watchedState.form.isSubmitting) {
+    if (submitButton) {
       submitButton.textContent = t('app.form.submitButton');
     }
     
     // Update language dropdown button
     const currentLang = getCurrentLanguage();
     if (languageDropdown) {
-      const flag = currentLang === 'es' ? '🇪🇸' : '🇺🇸';
       const langCode = currentLang.toUpperCase();
       languageDropdown.innerHTML = `🌐 ${langCode}`;
     }
@@ -189,7 +182,9 @@ const initApp = async () => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const lang = e.target.dataset.lang;
-      changeLanguage(lang);
+      changeLanguage(lang).then(() => {
+        updateUITexts();
+      });
     });
   });
 

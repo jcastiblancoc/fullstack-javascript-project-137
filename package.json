@@ -7,8 +7,7 @@
     "build": "webpack --mode production",
     "dev": "webpack serve --mode development",
     "start": "webpack serve --mode development --open",
-    "lint": "eslint src/",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint src/"
   },
   "repository": {
     "type": "git",
@@ -27,6 +26,8 @@
     "@babel/plugin-transform-modules-commonjs": "^7.27.1",
     "@babel/preset-env": "^7.28.3",
     "@eslint/js": "^9.35.0",
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.3.1",
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.2",
     "eslint": "^9.35.0",
