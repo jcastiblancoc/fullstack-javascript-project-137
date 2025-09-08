@@ -6,6 +6,9 @@ import { createRssUrlSchema } from './validation.js';
 import { initElements, createWatchedState, showError, showSuccess, displayFeed } from './view.js';
 import { rssService } from './rssService.js';
 import { dataStore } from './dataStore.js';
+import { RSSService } from './rssService.js';
+import { i18n } from './i18n.js';
+import { feedUpdater } from './feedUpdater.js';
 
 // Initialize the application
 const initApp = async () => {
@@ -107,6 +110,12 @@ const initApp = async () => {
       displayFeed(feed, posts);
       showSuccess(t('app.messages.success'));
       
+      // Start feed updater if this is the first feed
+      if (dataStore.getAllFeeds().length === 1) {
+        feedUpdater.start();
+        console.log(t('app.messages.updaterStarted'));
+      }
+      
       // Reset form
       watchedState.form.url = '';
       watchedState.form.isValid = true;
@@ -176,14 +185,49 @@ const initApp = async () => {
   };
 
   // Handle language change
-  languageItems.forEach(item => {
-    item.addEventListener('click', async (e) => {
+  document.querySelectorAll('[data-lang]').forEach(link => {
+    link.addEventListener('click', (e) => {
       e.preventDefault();
-      const newLang = e.target.dataset.lang;
-      await changeLanguage(newLang);
-      updateUITexts();
+      const lang = e.target.dataset.lang;
+      changeLanguage(lang);
     });
   });
+
+  // Feed updater control buttons
+  const startButton = document.getElementById('start-updates');
+  const stopButton = document.getElementById('stop-updates');
+  const statusButton = document.getElementById('update-status');
+
+  if (startButton) {
+    startButton.addEventListener('click', () => {
+      feedUpdater.start();
+      startButton.disabled = true;
+      stopButton.disabled = false;
+      showSuccess(t('app.messages.updaterStarted'));
+    });
+  }
+
+  if (stopButton) {
+    stopButton.addEventListener('click', () => {
+      feedUpdater.stop();
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      showSuccess(t('app.messages.updaterStopped'));
+    });
+  }
+
+  if (statusButton) {
+    statusButton.addEventListener('click', () => {
+      const stats = feedUpdater.getStats();
+      const message = `Updates: ${stats.isRunning ? 'Running' : 'Stopped'} | Cycles: ${stats.updateCount} | Feeds: ${dataStore.getAllFeeds().length}`;
+      alert(message);
+    });
+  }
+
+  // Request notification permission on page load
+  if ('Notification' in window) {
+    feedUpdater.constructor.requestNotificationPermission();
+  }
 
   // Initial UI text update
   updateUITexts();

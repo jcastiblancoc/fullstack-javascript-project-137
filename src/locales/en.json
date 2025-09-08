@@ -26,14 +26,15 @@
       "by": "by {{author}}"
     },
     "messages": {
-      "success": "RSS feed added successfully",
-      "error": {
-        "loadFeed": "Error loading RSS feed",
-        "parseFeed": "Error parsing RSS feed",
-        "networkError": "Network error - check your connection",
-        "timeout": "Request timeout - server took too long to respond",
-        "generic": "An unexpected error occurred"
-      }
+      "success": "RSS feed added successfully!",
+      "networkError": "Network error - unable to reach the feed server",
+      "timeout": "Request timeout - server took too long to respond",
+      "invalidFormat": "Error parsing RSS feed - invalid format",
+      "unexpectedError": "An unexpected error occurred",
+      "newPosts": "{{count}} new posts found in {{feedTitle}}",
+      "newPostsTitle": "New RSS Posts Available",
+      "updaterStarted": "RSS feed updates started - checking every 5 seconds",
+      "updaterStopped": "RSS feed updates stopped"
     }
   },
   "validation": {

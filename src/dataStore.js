@@ -97,6 +97,48 @@ class DataStore {
     };
   }
 
+  // Add new posts to existing feed
+  addNewPosts(feedId, newPosts) {
+    if (!this.feeds.has(feedId)) {
+      throw new Error(`Feed with ID ${feedId} not found`);
+    }
+
+    const existingPostIds = this.feedPosts.get(feedId) || new Set();
+    const addedPosts = [];
+
+    newPosts.forEach(post => {
+      // Check if post already exists by comparing link or title+date
+      const isDuplicate = Array.from(existingPostIds).some(postId => {
+        const existingPost = this.posts.get(postId);
+        return existingPost && (
+          existingPost.link === post.link ||
+          (existingPost.title === post.title && existingPost.pubDate === post.pubDate)
+        );
+      });
+
+      if (!isDuplicate) {
+        const postWithFeedId = { ...post, feedId };
+        this.posts.set(post.id, postWithFeedId);
+        existingPostIds.add(post.id);
+        addedPosts.push(post);
+      }
+    });
+
+    this.feedPosts.set(feedId, existingPostIds);
+    return addedPosts;
+  }
+
+  // Update feed metadata (last checked time, etc.)
+  updateFeedMetadata(feedId, metadata) {
+    const feed = this.feeds.get(feedId);
+    if (feed) {
+      const updatedFeed = { ...feed, ...metadata };
+      this.feeds.set(feedId, updatedFeed);
+      return updatedFeed;
+    }
+    return null;
+  }
+
   // Clear all data
   clear() {
     this.feeds.clear();

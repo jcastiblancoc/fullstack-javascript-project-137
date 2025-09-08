@@ -29,7 +29,20 @@
                                 <input type="url" class="form-control" id="rss-url" placeholder="https://ejemplo.com/rss" autocomplete="off" spellcheck="false">
                                 <div class="form-text">Ingresa la URL del feed RSS que deseas agregar</div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Agregar RSS</button>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button type="submit" class="btn btn-primary">Agregar RSS</button>
+                                <div class="d-flex gap-2">
+                                    <button type="button" id="start-updates" class="btn btn-success btn-sm">
+                                        <i class="bi bi-play-fill"></i> Iniciar Actualizaciones
+                                    </button>
+                                    <button type="button" id="stop-updates" class="btn btn-danger btn-sm" disabled>
+                                        <i class="bi bi-pause-fill"></i> Detener Actualizaciones
+                                    </button>
+                                    <button type="button" id="update-status" class="btn btn-info btn-sm" title="Estado de actualizaciones">
+                                        <i class="bi bi-info-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>

@@ -22,18 +22,18 @@
     "posts": {
       "title": "Posts del Feed",
       "readMore": "Leer más",
-      "publishedOn": "Publicado el {{date}}",
-      "by": "por {{author}}"
+      "publishedOn": "Publicado el {{date}}"
     },
     "messages": {
-      "success": "Feed RSS agregado exitosamente",
-      "error": {
-        "loadFeed": "Error al cargar el feed RSS",
-        "parseFeed": "Error al procesar el feed RSS",
-        "networkError": "Error de red - verifica tu conexión",
-        "timeout": "Tiempo de espera agotado - el servidor tardó demasiado en responder",
-        "generic": "Ha ocurrido un error inesperado"
-      }
+      "success": "¡Feed RSS agregado exitosamente!",
+      "networkError": "Error de red - no se puede alcanzar el servidor del feed",
+      "timeout": "Tiempo de espera agotado - el servidor tardó demasiado en responder",
+      "invalidFormat": "Error al analizar el feed RSS - formato inválido",
+      "unexpectedError": "Ocurrió un error inesperado",
+      "newPosts": "{{count}} nuevos posts encontrados en {{feedTitle}}",
+      "newPostsTitle": "Nuevos Posts RSS Disponibles",
+      "updaterStarted": "Actualizaciones de RSS iniciadas - verificando cada 5 segundos",
+      "updaterStopped": "Actualizaciones de RSS detenidas"
     }
   },
   "validation": {
