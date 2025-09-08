@@ -55,5 +55,30 @@
             </div>
         </div>
     </div>
+
+    <!-- Post Preview Modal -->
+    <div class="modal fade" id="postPreviewModal" tabindex="-1" aria-labelledby="postPreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="postPreviewModalLabel">Vista Previa del Post</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 id="modal-post-title" class="fw-bold mb-3"></h6>
+                    <div id="modal-post-description" class="mb-3"></div>
+                    <div class="d-flex justify-content-between align-items-center text-muted small">
+                        <span id="modal-post-date"></span>
+                        <a id="modal-post-link" href="#" target="_blank" class="btn btn-outline-primary btn-sm">
+                            Leer artículo completo
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

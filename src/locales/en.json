@@ -23,7 +23,12 @@
       "title": "Feed Posts",
       "readMore": "Read more",
       "publishedOn": "Published on {{date}}",
-      "by": "by {{author}}"
+      "by": "by {{author}}",
+      "preview": "Preview",
+      "previewTitle": "Post Preview",
+      "readFullArticle": "Read full article",
+      "close": "Close",
+      "markAsRead": "Mark as read"
     },
     "messages": {
       "success": "RSS feed added successfully!",

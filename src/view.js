@@ -1,5 +1,6 @@
 import onChange from 'on-change';
 import { t } from './i18n.js';
+import { dataStore } from './dataStore.js';
 
 // Application state
 const initialState = {
@@ -129,7 +130,7 @@ const renderFeed = (feedData, postsData = []) => {
       <div class="posts-section">
         <h6 class="mb-3">${t('app.posts.title')}</h6>
         <div class="posts-list" id="posts-${feedData.id}">
-          ${renderPostsList(postsData)}
+          ${renderPosts(postsData)}
         </div>
       </div>
     </div>
@@ -138,27 +139,41 @@ const renderFeed = (feedData, postsData = []) => {
   feedsContainer.appendChild(feedElement);
 };
 
-const renderPostsList = (posts) => {
+const renderPosts = (posts) => {
   if (!posts || posts.length === 0) {
-    return `<p class="text-muted">${t('app.feed.noPosts')}</p>`;
+    return '<p class="text-muted">No posts available</p>';
   }
-  
+
   return posts.map(post => {
     const publishDate = post.pubDate ? new Date(post.pubDate).toLocaleDateString() : '';
-    const author = post.author ? ` ${t('app.posts.by', { author: post.author })}` : '';
+    const author = post.author ? ` - ${post.author}` : '';
+    const isRead = dataStore.isPostRead(post.id);
+    const titleClass = isRead ? 'fw-normal' : 'fw-bold';
     
     return `
       <div class="post-item mb-3 p-3 border rounded">
-        <h6 class="post-title">
-          <a href="${post.link}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
-            ${post.title}
-          </a>
-        </h6>
-        ${post.description ? `<p class="post-description text-muted small">${post.description.slice(0, 200)}${post.description.length > 200 ? '...' : ''}</p>` : ''}
-        <div class="post-meta">
-          <small class="text-muted">
-            ${publishDate ? t('app.posts.publishedOn', { date: publishDate }) : ''}${author}
-          </small>
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="flex-grow-1">
+            <h6 class="post-title ${titleClass}">
+              <a href="${post.link}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                ${post.title}
+              </a>
+            </h6>
+            ${post.description ? `<p class="post-description text-muted small">${post.description.slice(0, 200)}${post.description.length > 200 ? '...' : ''}</p>` : ''}
+            <div class="post-meta">
+              <small class="text-muted">
+                ${publishDate ? t('app.posts.publishedOn', { date: publishDate }) : ''}${author}
+              </small>
+            </div>
+          </div>
+          <div class="ms-3">
+            <button type="button" class="btn btn-outline-info btn-sm preview-btn" 
+                    data-post-id="${post.id}" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#postPreviewModal">
+              <i class="bi bi-eye"></i> ${t('app.posts.preview')}
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -198,4 +213,65 @@ export const showSuccess = (message) => {
 
 export const displayFeed = (feedData, postsData) => {
   renderFeed(feedData, postsData);
+  setupPostPreviewHandlers();
+};
+
+// Setup post preview modal handlers
+const setupPostPreviewHandlers = () => {
+  // Remove existing listeners to avoid duplicates
+  document.querySelectorAll('.preview-btn').forEach(btn => {
+    btn.removeEventListener('click', handlePreviewClick);
+    btn.addEventListener('click', handlePreviewClick);
+  });
+};
+
+// Handle preview button click
+const handlePreviewClick = (event) => {
+  const postId = event.currentTarget.dataset.postId;
+  const post = dataStore.posts.get(postId);
+  
+  if (!post) {
+    console.error('Post not found:', postId);
+    return;
+  }
+
+  // Mark post as read
+  dataStore.markPostAsRead(postId);
+  
+  // Update the post title styling
+  const postElement = event.currentTarget.closest('.post-item');
+  const titleElement = postElement.querySelector('.post-title');
+  titleElement.classList.remove('fw-bold');
+  titleElement.classList.add('fw-normal');
+  
+  // Populate modal with post data
+  populatePreviewModal(post);
+};
+
+// Populate the preview modal with post data
+const populatePreviewModal = (post) => {
+  const modal = document.getElementById('postPreviewModal');
+  const modalTitle = document.getElementById('postPreviewModalLabel');
+  const postTitle = document.getElementById('modal-post-title');
+  const postDescription = document.getElementById('modal-post-description');
+  const postDate = document.getElementById('modal-post-date');
+  const postLink = document.getElementById('modal-post-link');
+  
+  if (modalTitle) modalTitle.textContent = t('app.posts.previewTitle');
+  if (postTitle) postTitle.textContent = post.title || 'No title';
+  if (postDescription) {
+    postDescription.innerHTML = post.description || '<em>No description available</em>';
+  }
+  if (postDate && post.pubDate) {
+    const formattedDate = new Date(post.pubDate).toLocaleDateString();
+    postDate.textContent = t('app.posts.publishedOn', { date: formattedDate });
+  }
+  if (postLink) {
+    postLink.href = post.link || '#';
+    postLink.textContent = t('app.posts.readFullArticle');
+  }
+  
+  // Update modal footer button text
+  const closeButton = modal.querySelector('.modal-footer .btn-secondary');
+  if (closeButton) closeButton.textContent = t('app.posts.close');
 };

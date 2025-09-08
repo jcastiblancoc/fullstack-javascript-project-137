@@ -5,6 +5,7 @@ class DataStore {
     this.posts = new Map(); // postId -> post object
     this.feedPosts = new Map(); // feedId -> Set of postIds
     this.feedUrls = new Set(); // Track added feed URLs for duplicates
+    this.readPosts = new Set(); // Track read post IDs
   }
 
   // Add a new feed with its posts
@@ -139,12 +140,34 @@ class DataStore {
     return null;
   }
 
+  // Mark post as read
+  markPostAsRead(postId) {
+    this.readPosts.add(postId);
+  }
+
+  // Check if post is read
+  isPostRead(postId) {
+    return this.readPosts.has(postId);
+  }
+
+  // Get read posts count
+  getReadPostsCount() {
+    return this.readPosts.size;
+  }
+
+  // Get unread posts for a feed
+  getUnreadFeedPosts(feedId) {
+    const allPosts = this.getFeedPosts(feedId);
+    return allPosts.filter(post => !this.isPostRead(post.id));
+  }
+
   // Clear all data
   clear() {
     this.feeds.clear();
     this.posts.clear();
     this.feedPosts.clear();
     this.feedUrls.clear();
+    this.readPosts.clear();
   }
 }
 
