@@ -9,16 +9,29 @@
       "processing": "Processing..."
     },
     "feed": {
-      "title": "RSS Feed from {{hostname}}",
+      "title": "{{title}}",
+      "description": "{{description}}",
       "url": "URL: {{url}}",
       "added": "Added: {{date}}",
       "status": "Active",
-      "viewContent": "View feed content"
+      "viewContent": "View feed content",
+      "posts": "Posts ({{count}})",
+      "noPosts": "No posts available",
+      "lastUpdated": "Last updated: {{date}}"
+    },
+    "posts": {
+      "title": "Feed Posts",
+      "readMore": "Read more",
+      "publishedOn": "Published on {{date}}",
+      "by": "by {{author}}"
     },
     "messages": {
       "success": "RSS feed added successfully",
       "error": {
         "loadFeed": "Error loading RSS feed",
+        "parseFeed": "Error parsing RSS feed",
+        "networkError": "Network error - check your connection",
+        "timeout": "Request timeout - server took too long to respond",
         "generic": "An unexpected error occurred"
       }
     }

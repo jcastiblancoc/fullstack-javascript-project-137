@@ -9,7 +9,8 @@ const initialState = {
     errors: [],
     isSubmitting: false
   },
-  feeds: []
+  feeds: [],
+  posts: []
 };
 
 // DOM elements
@@ -31,11 +32,12 @@ export const initElements = () => {
 // Render functions
 const renderFormValidation = (state) => {
   const { urlInput } = elements;
-  if (!urlInput) return;
+  if (!urlInput || !state || !state.form) return;
 
-  // Toggle red border based on validation state
+  // Update input styling
+  urlInput.classList.remove('is-valid', 'is-invalid');
+  
   if (state.form.isValid) {
-    urlInput.classList.remove('is-invalid');
     urlInput.classList.add('is-valid');
   } else {
     urlInput.classList.remove('is-valid');
@@ -45,7 +47,7 @@ const renderFormValidation = (state) => {
   // Show/hide error messages
   let feedbackElement = urlInput.parentElement.querySelector('.invalid-feedback');
   
-  if (!state.form.isValid && state.form.errors.length > 0) {
+  if (!state.form.isValid && state.form.errors && state.form.errors.length > 0) {
     if (!feedbackElement) {
       feedbackElement = document.createElement('div');
       feedbackElement.className = 'invalid-feedback';
@@ -60,7 +62,7 @@ const renderFormValidation = (state) => {
 
 const renderSubmitButton = (state) => {
   const { submitButton } = elements;
-  if (!submitButton) return;
+  if (!submitButton || !state || !state.form) return;
 
   if (state.form.isSubmitting) {
     submitButton.disabled = true;
@@ -75,17 +77,15 @@ const renderFormReset = (state) => {
   const { urlInput } = elements;
   if (!urlInput) return;
 
-  if (state.form.url === '') {
-    urlInput.value = '';
-    urlInput.classList.remove('is-valid', 'is-invalid');
-    urlInput.focus();
-    
-    // Remove any error messages
-    const feedbackElement = urlInput.parentElement.querySelector('.invalid-feedback');
-    if (feedbackElement) {
-      feedbackElement.style.display = 'none';
-    }
+  urlInput.value = '';
+  urlInput.classList.remove('is-valid', 'is-invalid');
+  
+  const feedbackElement = urlInput.parentElement.querySelector('.invalid-feedback');
+  if (feedbackElement) {
+    feedbackElement.style.display = 'none';
   }
+  
+  urlInput.focus();
 };
 
 const renderAlert = (type, message) => {
@@ -102,32 +102,67 @@ const renderAlert = (type, message) => {
   feedsContainer.insertBefore(alertElement, feedsContainer.firstChild);
 };
 
-const renderFeed = (url, data) => {
+const renderFeed = (feedData, postsData = []) => {
   const { feedsContainer } = elements;
   if (!feedsContainer) return;
   
-  const hostname = new URL(url).hostname;
-  const addedDate = new Date().toLocaleString();
+  const addedDate = new Date(feedData.addedAt).toLocaleString();
+  const lastUpdated = feedData.lastBuildDate ? new Date(feedData.lastBuildDate).toLocaleString() : addedDate;
   
   const feedElement = document.createElement('div');
-  feedElement.className = 'card mb-3';
+  feedElement.className = 'card mb-4';
+  feedElement.setAttribute('data-feed-id', feedData.id);
+  
   feedElement.innerHTML = `
     <div class="card-body">
-      <h5 class="card-title">${t('app.feed.title', { hostname })}</h5>
-      <p class="card-text">
-        <small class="text-muted">${t('app.feed.url', { url })}</small><br>
-        <small class="text-muted">${t('app.feed.added', { date: addedDate })}</small>
-      </p>
-      <div class="mt-2">
-        <span class="badge bg-success">${t('app.feed.status')}</span>
+      <h5 class="card-title">${feedData.title}</h5>
+      <p class="card-text text-muted">${feedData.description}</p>
+      <div class="mb-2">
+        <small class="text-muted">${t('app.feed.url', { url: feedData.originalUrl })}</small><br>
+        <small class="text-muted">${t('app.feed.added', { date: addedDate })}</small><br>
+        ${feedData.lastBuildDate ? `<small class="text-muted">${t('app.feed.lastUpdated', { date: lastUpdated })}</small>` : ''}
       </div>
-      <details class="mt-2">
-        <summary>${t('app.feed.viewContent')}</summary>
-        <pre class="mt-2 p-2 bg-light border rounded" style="max-height: 200px; overflow-y: auto; font-size: 0.8em;">${data.slice(0, 500)}...</pre>
-      </details>
+      <div class="mb-3">
+        <span class="badge bg-success me-2">${t('app.feed.status')}</span>
+        <span class="badge bg-info">${t('app.feed.posts', { count: postsData.length })}</span>
+      </div>
+      <div class="posts-section">
+        <h6 class="mb-3">${t('app.posts.title')}</h6>
+        <div class="posts-list" id="posts-${feedData.id}">
+          ${renderPostsList(postsData)}
+        </div>
+      </div>
     </div>
   `;
+  
   feedsContainer.appendChild(feedElement);
+};
+
+const renderPostsList = (posts) => {
+  if (!posts || posts.length === 0) {
+    return `<p class="text-muted">${t('app.feed.noPosts')}</p>`;
+  }
+  
+  return posts.map(post => {
+    const publishDate = post.pubDate ? new Date(post.pubDate).toLocaleDateString() : '';
+    const author = post.author ? ` ${t('app.posts.by', { author: post.author })}` : '';
+    
+    return `
+      <div class="post-item mb-3 p-3 border rounded">
+        <h6 class="post-title">
+          <a href="${post.link}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+            ${post.title}
+          </a>
+        </h6>
+        ${post.description ? `<p class="post-description text-muted small">${post.description.slice(0, 200)}${post.description.length > 200 ? '...' : ''}</p>` : ''}
+        <div class="post-meta">
+          <small class="text-muted">
+            ${publishDate ? t('app.posts.publishedOn', { date: publishDate }) : ''}${author}
+          </small>
+        </div>
+      </div>
+    `;
+  }).join('');
 };
 
 // Create watched state
@@ -161,6 +196,6 @@ export const showSuccess = (message) => {
   renderAlert('success', message);
 };
 
-export const displayFeed = (url, data) => {
-  renderFeed(url, data);
+export const displayFeed = (feedData, postsData) => {
+  renderFeed(feedData, postsData);
 };

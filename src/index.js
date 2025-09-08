@@ -2,8 +2,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './styles.css';
 import initI18n, { t, changeLanguage, getCurrentLanguage } from './i18n.js';
-import { createRssUrlSchema, addFeedToStore } from './validation.js';
+import { createRssUrlSchema } from './validation.js';
 import { initElements, createWatchedState, showError, showSuccess, displayFeed } from './view.js';
+import { rssService } from './rssService.js';
+import { dataStore } from './dataStore.js';
 
 // Initialize the application
 const initApp = async () => {
@@ -29,31 +31,24 @@ const initApp = async () => {
   input.addEventListener('input', async () => {
     const url = input.value.trim();
     
-    if (!url) {
-      watchedState.form.isValid = true;
-      watchedState.form.errors = [];
-      return;
-    }
-
-    try {
-      // Only validate format and uniqueness on input, not RSS validity (too expensive)
-      const rssUrlSchema = createRssUrlSchema(t);
-      await rssUrlSchema.validate(url, { abortEarly: false });
-      watchedState.form.isValid = true;
-      watchedState.form.errors = [];
-    } catch (error) {
-      // Filter out RSS validation errors for real-time validation
-      const nonRssErrors = error.errors?.filter(err => 
-        !err.includes(t('validation.invalidRss')) && !err.includes(t('validation.notRssContent'))
-      ) || [error.message];
-      
-      if (nonRssErrors.length > 0) {
-        watchedState.form.isValid = false;
-        watchedState.form.errors = nonRssErrors;
-      } else {
+    if (url) {
+      try {
+        const rssUrlSchema = createRssUrlSchema(t);
+        await rssUrlSchema.validate(url, { abortEarly: false });
         watchedState.form.isValid = true;
         watchedState.form.errors = [];
+      } catch (error) {
+        if (error.errors) {
+          watchedState.form.isValid = false;
+          watchedState.form.errors = error.errors;
+        } else {
+          watchedState.form.isValid = false;
+          watchedState.form.errors = [error.message];
+        }
       }
+    } else {
+      watchedState.form.isValid = true;
+      watchedState.form.errors = [];
     }
   });
 
@@ -74,22 +69,42 @@ const initApp = async () => {
     watchedState.form.url = url;
 
     try {
-      // Full validation including RSS validity
+      // Basic URL validation first
       const rssUrlSchema = createRssUrlSchema(t);
       await rssUrlSchema.validate(url, { abortEarly: false });
       
-      // If validation passes, fetch the RSS feed
-      const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+      // Download and parse RSS feed
+      const result = await rssService.fetchAndParseFeed(url);
+      console.log('RSS service result:', result);
       
-      if (!response.ok) {
-        throw new Error(t('app.messages.error.loadFeed'));
+      // Extract feed and posts from result
+      console.log('Result structure check:', {
+        hasResult: !!result,
+        hasFeed: !!(result && result.feed),
+        hasPosts: !!(result && result.posts),
+        resultKeys: result ? Object.keys(result) : 'no result'
+      });
+      
+      const feedData = result && result.feed ? result.feed : result;
+      const postsData = result && result.posts ? result.posts : [];
+      
+      console.log('Feed data:', feedData);
+      console.log('Posts data:', postsData);
+      
+      // Validate feedData before passing to dataStore
+      if (!feedData || typeof feedData !== 'object') {
+        throw new Error('Invalid feed data structure received from RSS service');
       }
       
-      const data = await response.json();
+      // Add to data store
+      const feedId = dataStore.addFeed(feedData, postsData);
       
-      // Add to store and display
-      addFeedToStore(url);
-      displayFeed(url, data.contents);
+      // Get feed and posts for display
+      const feed = dataStore.getFeed(feedId);
+      const posts = dataStore.getFeedPosts(feedId);
+      
+      // Display feed with posts
+      displayFeed(feed, posts);
       showSuccess(t('app.messages.success'));
       
       // Reset form
@@ -98,14 +113,33 @@ const initApp = async () => {
       watchedState.form.errors = [];
       
     } catch (error) {
-      // Handle validation or fetch errors
+      console.error('Form submission error:', error);
+      console.error('Error stack:', error.stack);
+      console.error('Error message:', error.message);
+      
+      // Handle different types of errors
       if (error.errors) {
         // Yup validation errors
         watchedState.form.isValid = false;
         watchedState.form.errors = error.errors;
       } else {
-        // Other errors (fetch, etc.)
-        showError(error.message || t('app.messages.error.generic'));
+        // Network, parsing, or other errors
+        let errorMessage = t('app.messages.error.generic');
+        
+        if (error.message.includes('timeout') || error.message.includes('taking too long')) {
+          errorMessage = t('app.messages.error.timeout');
+        } else if (error.message.includes('Network error') || error.message.includes('unable to reach')) {
+          errorMessage = t('app.messages.error.networkError');
+        } else if (error.message.includes('parsing') || error.message.includes('RSS')) {
+          errorMessage = t('app.messages.error.parseFeed');
+        } else if (error.message.includes('server responded')) {
+          errorMessage = t('app.messages.error.loadFeed');
+        } else {
+          // Show the actual error message for debugging
+          errorMessage = `Error: ${error.message}`;
+        }
+        
+        showError(errorMessage);
       }
     } finally {
       // Reset submitting state

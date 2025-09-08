@@ -9,16 +9,29 @@
       "processing": "Procesando..."
     },
     "feed": {
-      "title": "Feed RSS de {{hostname}}",
+      "title": "{{title}}",
+      "description": "{{description}}",
       "url": "URL: {{url}}",
       "added": "Agregado: {{date}}",
       "status": "Activo",
-      "viewContent": "Ver contenido del feed"
+      "viewContent": "Ver contenido del feed",
+      "posts": "Posts ({{count}})",
+      "noPosts": "No hay posts disponibles",
+      "lastUpdated": "Última actualización: {{date}}"
+    },
+    "posts": {
+      "title": "Posts del Feed",
+      "readMore": "Leer más",
+      "publishedOn": "Publicado el {{date}}",
+      "by": "por {{author}}"
     },
     "messages": {
       "success": "Feed RSS agregado exitosamente",
       "error": {
         "loadFeed": "Error al cargar el feed RSS",
+        "parseFeed": "Error al procesar el feed RSS",
+        "networkError": "Error de red - verifica tu conexión",
+        "timeout": "Tiempo de espera agotado - el servidor tardó demasiado en responder",
         "generic": "Ha ocurrido un error inesperado"
       }
     }
