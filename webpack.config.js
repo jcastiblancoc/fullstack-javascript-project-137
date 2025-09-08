@@ -1,7 +1,7 @@
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import path from 'path';
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
 
-export default {
+module.exports = {
   entry: './src/index.js',
   output: {
     filename: 'bundle.js',
@@ -15,6 +15,17 @@ export default {
   ],
   module: {
     rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
+            plugins: ['@babel/plugin-transform-modules-commonjs']
+          }
+        }
+      },
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],

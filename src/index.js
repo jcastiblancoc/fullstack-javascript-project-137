@@ -1,123 +1,115 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles.css';
+import { rssUrlSchema, addFeedToStore } from './validation.js';
+import { initElements, createWatchedState, showError, showSuccess, displayFeed } from './view.js';
 
-
-// Función para validar URL RSS
-function validateRSSUrl(url) {
-  return new Promise((resolve, reject) => {
-    try {
-      const urlObj = new URL(url);
-      if (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') {
-        resolve(true);
-      } else {
-        reject(new Error('URL debe usar protocolo HTTP o HTTPS'));
-      }
-    } catch (error) {
-      reject(new Error('URL no válida'));
-    }
-  });
-}
-
-// Función para mostrar mensajes de error
-function showError(message) {
-  const feedsContainer = document.getElementById('feeds-container');
-  if (!feedsContainer) return;
+// Initialize the application
+const initApp = () => {
+  // Initialize DOM elements
+  initElements();
   
-  const errorElement = document.createElement('div');
-  errorElement.className = 'alert alert-danger alert-dismissible fade show';
-  errorElement.innerHTML = `
-    ${message}
-    <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
-  `;
-  feedsContainer.insertBefore(errorElement, feedsContainer.firstChild);
-}
-
-// Función para mostrar mensajes de éxito
-function showSuccess(message) {
-  const feedsContainer = document.getElementById('feeds-container');
-  if (!feedsContainer) return;
+  // Create watched state
+  const watchedState = createWatchedState();
   
-  const successElement = document.createElement('div');
-  successElement.className = 'alert alert-success alert-dismissible fade show';
-  successElement.innerHTML = `
-    ${message}
-    <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
-  `;
-  feedsContainer.insertBefore(successElement, feedsContainer.firstChild);
-}
-
-// Función para mostrar el feed en la interfaz
-function displayFeed(url, data) {
-  const feedsContainer = document.getElementById('feeds-container');
-  if (!feedsContainer) return;
+  // Get form elements
+  const form = document.getElementById('rss-form');
+  const input = document.getElementById('rss-url');
   
-  const feedElement = document.createElement('div');
-  feedElement.className = 'card mb-3';
-  feedElement.innerHTML = `
-    <div class="card-body">
-      <h5 class="card-title">Feed RSS de ${new URL(url).hostname}</h5>
-      <p class="card-text">
-        <small class="text-muted">URL: ${url}</small><br>
-        <small class="text-muted">Agregado: ${new Date().toLocaleString()}</small>
-      </p>
-      <div class="mt-2">
-        <span class="badge bg-success">Activo</span>
-      </div>
-      <details class="mt-2">
-        <summary>Ver contenido del feed</summary>
-        <pre class="mt-2 p-2 bg-light border rounded" style="max-height: 200px; overflow-y: auto; font-size: 0.8em;">${data.slice(0, 500)}...</pre>
-      </details>
-    </div>
-  `;
-  feedsContainer.appendChild(feedElement);
-}
+  if (!form || !input) {
+    console.error('Required form elements not found');
+    return;
+  }
 
-const form = document.getElementById('rss-form');
-const input = document.getElementById('rss-url');
-
-if (form && input) {
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
+  // Input validation on change (real-time feedback)
+  input.addEventListener('input', async () => {
     const url = input.value.trim();
-    const submitButton = form.querySelector('button[type="submit"]');
-
+    
     if (!url) {
-      showError('Por favor, ingresa una URL válida');
+      watchedState.form.isValid = true;
+      watchedState.form.errors = [];
       return;
     }
 
-    // Deshabilitar el botón mientras se procesa
-    if (submitButton) {
-      submitButton.disabled = true;
-      submitButton.textContent = 'Procesando...';
+    try {
+      // Only validate format and uniqueness on input, not RSS validity (too expensive)
+      await rssUrlSchema.validate(url, { abortEarly: false });
+      watchedState.form.isValid = true;
+      watchedState.form.errors = [];
+    } catch (error) {
+      // Filter out RSS validation errors for real-time validation
+      const nonRssErrors = error.errors?.filter(err => 
+        !err.includes('feed RSS válido')
+      ) || [error.message];
+      
+      if (nonRssErrors.length > 0) {
+        watchedState.form.isValid = false;
+        watchedState.form.errors = nonRssErrors;
+      } else {
+        watchedState.form.isValid = true;
+        watchedState.form.errors = [];
+      }
+    }
+  });
+
+  // Form submission with full validation
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const url = input.value.trim();
+    
+    if (!url) {
+      watchedState.form.isValid = false;
+      watchedState.form.errors = ['Por favor, ingresa una URL válida'];
+      return;
     }
 
-    // Usar promesas para validar y agregar el feed
-    validateRSSUrl(url)
-      .then(() => {
-        return fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-      })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Error al cargar el feed RSS');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        displayFeed(url, data.contents);
-        showSuccess('Feed RSS agregado exitosamente');
-        input.value = '';
-      })
-      .catch((error) => {
+    // Set submitting state
+    watchedState.form.isSubmitting = true;
+    watchedState.form.url = url;
+
+    try {
+      // Full validation including RSS validity
+      await rssUrlSchema.validate(url, { abortEarly: false });
+      
+      // If validation passes, fetch the RSS feed
+      const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar el feed RSS');
+      }
+      
+      const data = await response.json();
+      
+      // Add to store and display
+      addFeedToStore(url);
+      displayFeed(url, data.contents);
+      showSuccess('Feed RSS agregado exitosamente');
+      
+      // Reset form
+      watchedState.form.url = '';
+      watchedState.form.isValid = true;
+      watchedState.form.errors = [];
+      
+    } catch (error) {
+      // Handle validation or fetch errors
+      if (error.errors) {
+        // Yup validation errors
+        watchedState.form.isValid = false;
+        watchedState.form.errors = error.errors;
+      } else {
+        // Other errors (fetch, etc.)
         showError(error.message);
-      })
-      .finally(() => {
-        // Rehabilitar el botón
-        if (submitButton) {
-          submitButton.disabled = false;
-          submitButton.textContent = 'Agregar RSS';
-        }
-      });
+      }
+    } finally {
+      // Reset submitting state
+      watchedState.form.isSubmitting = false;
+    }
   });
+};
+
+// Initialize when DOM is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
 }
