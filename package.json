@@ -7,7 +7,10 @@
     "build": "webpack --mode production",
     "dev": "webpack serve --mode development",
     "start": "webpack serve --mode development --open",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui"
   },
   "repository": {
     "type": "git",

@@ -158,8 +158,9 @@ test.describe('RSS Aggregator', () => {
     await submitButton.click();
     
     // Should show error message (can be either network error or invalid RSS)
+    // Wait longer for webkit as it may take more time to detect network errors
     const errorAlert = page.locator('.alert-danger');
-    await expect(errorAlert).toBeVisible();
+    await expect(errorAlert).toBeVisible({ timeout: 15000 });
     await expect(errorAlert).toContainText(/Error de red|El recurso no contiene un RSS válido/);
   });
 

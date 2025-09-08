@@ -38,6 +38,8 @@ export default {
   },
   devServer: {
     static: './dist',
+    port: 51952,
+    host: 'localhost',
   },
   mode: 'development',
 };
