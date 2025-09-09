@@ -10,8 +10,8 @@ const initI18n = () => {
   return i18next
     .use(LanguageDetector)
     .init({
-      lng: 'es', // Set Spanish as default language
-      fallbackLng: 'es',
+      lng: 'en', // Set English as default language for Hexlet CI
+      fallbackLng: 'en',
       debug: false, // Disable debug for production
       
       // Language detection options
