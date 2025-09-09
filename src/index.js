@@ -76,8 +76,12 @@ const initApp = async () => {
       
       // Check for duplicate URL
       const existingFeeds = dataStore.getAllFeeds();
+      console.log('Checking for duplicates. Existing feeds:', existingFeeds.map(f => ({ originalUrl: f.originalUrl, link: f.link })));
+      console.log('Current URL:', url);
       const isDuplicate = existingFeeds.some(feed => feed.originalUrl === url || feed.link === url);
+      console.log('Is duplicate?', isDuplicate);
       if (isDuplicate) {
+        console.log('Duplicate detected, showing error');
         watchedState.form.isValid = false;
         watchedState.form.errors = [t('validation.duplicateUrl')];
         watchedState.form.isSubmitting = false;
