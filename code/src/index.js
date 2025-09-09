@@ -58,6 +58,7 @@ const initApp = async () => {
     e.preventDefault();
 
     const url = input.value.trim();
+    console.log('Form submitted with URL:', url);
     
     if (!url) {
       watchedState.form.isValid = false;
@@ -73,6 +74,20 @@ const initApp = async () => {
       // Basic URL validation first
       const rssUrlSchema = createRssUrlSchema(t);
       await rssUrlSchema.validate(url, { abortEarly: false });
+      
+      // Check for duplicate URL
+      const existingFeeds = dataStore.getAllFeeds();
+      console.log('Checking for duplicates. Existing feeds:', existingFeeds.map(f => ({ originalUrl: f.originalUrl, link: f.link })));
+      console.log('Current URL:', url);
+      const isDuplicate = existingFeeds.some(feed => feed.originalUrl === url || feed.link === url);
+      console.log('Is duplicate?', isDuplicate);
+      if (isDuplicate) {
+        console.log('Duplicate detected, showing error');
+        watchedState.form.isValid = false;
+        watchedState.form.errors = [t('validation.duplicateUrl')];
+        watchedState.form.isSubmitting = false;
+        return;
+      }
       
       // Download and parse RSS feed
       const result = await rssService.fetchAndParseFeed(url);
@@ -99,6 +114,7 @@ const initApp = async () => {
       
       // Add to data store
       const feedId = dataStore.addFeed(feedData, postsData);
+      console.log('Feed added to dataStore. All feeds now:', dataStore.getAllFeeds().map(f => ({ id: f.id, originalUrl: f.originalUrl, link: f.link })));
       
       // Get feed and posts for display
       const feed = dataStore.getFeed(feedId);
@@ -106,6 +122,7 @@ const initApp = async () => {
       
       // Display feed with posts
       displayFeed(feed, posts);
+      console.log('About to call showSuccess with message:', t('app.messages.success'));
       showSuccess(t('app.messages.success'));
       
       // Start feed updater if this is the first feed
