@@ -42,8 +42,13 @@ const initApp = async () => {
         
         // Check for duplicate URL in real-time
         const existingFeeds = dataStore.getAllFeeds();
+        console.log('Real-time validation - existing feeds:', existingFeeds.length);
+        console.log('Real-time validation - current URL:', url);
         const isDuplicate = existingFeeds.some(feed => feed.originalUrl === url || feed.link === url);
+        console.log('Real-time validation - is duplicate?', isDuplicate);
         if (isDuplicate) {
+          console.log('Duplicate detected in real-time validation, showing alert with text:', t('validation.duplicateUrl'));
+          showError(t('validation.duplicateUrl'));
           watchedState.form.isValid = false;
           watchedState.form.errors = [t('validation.duplicateUrl')];
         } else {
