@@ -91,9 +91,8 @@ const initApp = async () => {
       const isDuplicate = existingFeeds.some(feed => feed.originalUrl === url || feed.link === url);
       console.log('Is duplicate?', isDuplicate);
       if (isDuplicate) {
-        console.log('Duplicate detected, showing error');
-        watchedState.form.isValid = false;
-        watchedState.form.errors = [t('validation.duplicateUrl')];
+        console.log('Duplicate detected, showing error alert');
+        showError(t('validation.duplicateUrl'));
         watchedState.form.isSubmitting = false;
         return;
       }
