@@ -49,7 +49,9 @@ const updateSubmitButton = (isSubmitting) => {
 };
 
 const renderAlert = (type, message) => {
+  console.log('renderAlert called with:', { type, message });
   const feedsContainer = document.querySelector('.feeds');
+  console.log('feedsContainer found:', !!feedsContainer);
   if (!feedsContainer) return;
   
   const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
@@ -61,12 +63,16 @@ const renderAlert = (type, message) => {
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   `;
   
+  console.log('Alert element created:', alertElement.outerHTML);
+  
   // Remove any existing alerts
   const existingAlerts = feedsContainer.querySelectorAll('.alert');
+  console.log('Removing existing alerts:', existingAlerts.length);
   existingAlerts.forEach(alert => alert.remove());
   
   // Insert alert at the beginning of feeds container
   feedsContainer.insertBefore(alertElement, feedsContainer.firstChild);
+  console.log('Alert inserted into DOM');
   
   // Force reflow for Firefox
   alertElement.offsetHeight;
@@ -74,6 +80,7 @@ const renderAlert = (type, message) => {
   // Auto-dismiss after 5 seconds
   setTimeout(() => {
     if (alertElement.parentNode) {
+      console.log('Auto-removing alert after 5 seconds');
       alertElement.remove();
     }
   }, 5000);
@@ -187,6 +194,7 @@ export const showError = (message) => {
 };
 
 export const showSuccess = (message) => {
+  console.log('showSuccess called with message:', message);
   renderAlert('success', message);
 };
 

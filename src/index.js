@@ -106,6 +106,7 @@ const initApp = async () => {
       
       // Display feed with posts
       displayFeed(feed, posts);
+      console.log('About to call showSuccess with message:', t('app.messages.success'));
       showSuccess(t('app.messages.success'));
       
       // Start feed updater if this is the first feed
