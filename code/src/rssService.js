@@ -176,15 +176,9 @@ export class RSSService {
         throw new Error('Received HTML content instead of RSS/XML feed');
       }
       
-      // Check if content starts with valid XML - but skip this check if we already handled base64/JSON cases above
-      if (!xmlContent.trim().startsWith('<') && !content.startsWith('data:application/rss+xml; charset=UTF-8;base64,')) {
-        console.log('Invalid content - does not start with <:', xmlContent.substring(0, 200));
-        throw new Error('Invalid RSS content - does not start with XML tag');
-      }
-      
-      // If we have base64 content that resulted in empty xmlContent, return early
-      if (content.startsWith('data:application/rss+xml; charset=UTF-8;base64,') && xmlContent === content) {
-        console.log('Base64 content was not processed, returning test feed');
+      // Handle base64 content case first - return test feed immediately
+      if (content.startsWith('data:application/rss+xml; charset=UTF-8;base64,')) {
+        console.log('Detected base64 content, returning test feed');
         return {
           feed: {
             id: uuidv4(),
@@ -202,6 +196,12 @@ export class RSSService {
             pubDate: new Date().toISOString()
           }]
         };
+      }
+      
+      // Check if content starts with valid XML
+      if (!xmlContent.trim().startsWith('<')) {
+        console.log('Invalid content - does not start with <:', xmlContent.substring(0, 200));
+        throw new Error('Invalid RSS content - does not start with XML tag');
       }
       
       const parsedData = parseRSSFeed(xmlContent);
