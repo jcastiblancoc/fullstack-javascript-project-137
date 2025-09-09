@@ -74,6 +74,16 @@ const initApp = async () => {
       const rssUrlSchema = createRssUrlSchema(t);
       await rssUrlSchema.validate(url, { abortEarly: false });
       
+      // Check for duplicate URL
+      const existingFeeds = dataStore.getAllFeeds();
+      const isDuplicate = existingFeeds.some(feed => feed.originalUrl === url || feed.link === url);
+      if (isDuplicate) {
+        watchedState.form.isValid = false;
+        watchedState.form.errors = [t('validation.duplicateUrl')];
+        watchedState.form.isSubmitting = false;
+        return;
+      }
+      
       // Download and parse RSS feed
       const result = await rssService.fetchAndParseFeed(url);
       console.log('RSS service result:', result);
