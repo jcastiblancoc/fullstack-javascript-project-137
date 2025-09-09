@@ -114,6 +114,7 @@ const initApp = async () => {
       
       // Add to data store
       const feedId = dataStore.addFeed(feedData, postsData);
+      console.log('Feed added to dataStore. All feeds now:', dataStore.getAllFeeds().map(f => ({ id: f.id, originalUrl: f.originalUrl, link: f.link })));
       
       // Get feed and posts for display
       const feed = dataStore.getFeed(feedId);
