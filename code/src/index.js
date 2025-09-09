@@ -28,16 +28,28 @@ const initApp = async () => {
     return;
   }
 
-  // Input validation on change (real-time feedback)
+  // Real-time URL validation
   input.addEventListener('input', async () => {
     const url = input.value.trim();
     
-    if (url) {
+    if (!url) {
+      watchedState.form.isValid = true;
+      watchedState.form.errors = [];
+    } else {
       try {
         const rssUrlSchema = createRssUrlSchema(t);
         await rssUrlSchema.validate(url, { abortEarly: false });
-        watchedState.form.isValid = true;
-        watchedState.form.errors = [];
+        
+        // Check for duplicate URL in real-time
+        const existingFeeds = dataStore.getAllFeeds();
+        const isDuplicate = existingFeeds.some(feed => feed.originalUrl === url || feed.link === url);
+        if (isDuplicate) {
+          watchedState.form.isValid = false;
+          watchedState.form.errors = [t('validation.duplicateUrl')];
+        } else {
+          watchedState.form.isValid = true;
+          watchedState.form.errors = [];
+        }
       } catch (error) {
         if (error.errors) {
           watchedState.form.isValid = false;
@@ -47,9 +59,6 @@ const initApp = async () => {
           watchedState.form.errors = [error.message];
         }
       }
-    } else {
-      watchedState.form.isValid = true;
-      watchedState.form.errors = [];
     }
   });
 
