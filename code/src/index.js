@@ -148,6 +148,8 @@ const initApp = async () => {
     } finally {
       // Reset submitting state
       watchedState.form.isSubmitting = false;
+      // Clear form
+      input.value = '';
     }
   });
 
@@ -182,8 +184,14 @@ const initApp = async () => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const lang = e.target.dataset.lang;
+      console.log('Language change requested:', lang);
       changeLanguage(lang).then(() => {
+        console.log('Language changed, updating UI texts');
         updateUITexts();
+        // Force a small delay for Firefox to process the change
+        setTimeout(() => {
+          updateUITexts();
+        }, 100);
       });
     });
   });

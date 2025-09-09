@@ -19,17 +19,31 @@ export const initElements = () => {
 const updateFormValidation = (state) => {
   const { urlInput } = elements;
   if (!urlInput) return;
+
+  // Clear previous validation classes
+  urlInput.classList.remove('is-valid', 'is-invalid');
   
-  if (state.form.isValid) {
-    urlInput.classList.remove('is-invalid');
-    urlInput.classList.add('is-valid');
-  } else {
+  // Hide feedback initially
+  const feedback = urlInput.parentElement.querySelector('.invalid-feedback');
+  if (feedback) {
+    feedback.style.display = 'none';
+    feedback.textContent = '';
+    feedback.classList.remove('d-block');
+  }
+
+  if (state.form.isValid && urlInput.value.trim()) {
+    if (state.form.errors.length === 0) {
+      urlInput.classList.add('is-valid');
+    }
+  } else if (state.form.errors.length > 0) {
     urlInput.classList.remove('is-valid');
     urlInput.classList.add('is-invalid');
     
     const feedback = urlInput.parentElement.querySelector('.invalid-feedback');
-    if (feedback && state.form.errors.length > 0) {
+    if (feedback) {
       feedback.textContent = state.form.errors[0];
+      feedback.style.display = 'block';
+      feedback.classList.add('d-block');
     }
   }
 };
@@ -50,11 +64,15 @@ const updateSubmitButton = (isSubmitting) => {
 
 const renderAlert = (type, message) => {
   const feedsContainer = document.querySelector('.feeds');
-  if (!feedsContainer) return;
+  if (!feedsContainer) {
+    console.log('No feeds container found for alert');
+    return;
+  }
   
   const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
   const alertElement = document.createElement('div');
   alertElement.className = `alert ${alertClass} alert-dismissible fade show`;
+  alertElement.style.display = 'block';
   alertElement.innerHTML = `
     ${message}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -66,6 +84,11 @@ const renderAlert = (type, message) => {
   
   // Insert alert at the beginning of feeds container
   feedsContainer.insertBefore(alertElement, feedsContainer.firstChild);
+  
+  // Force reflow for Firefox
+  alertElement.offsetHeight;
+  
+  console.log('Alert rendered:', type, message, alertElement);
   
   // Auto-dismiss after 5 seconds
   setTimeout(() => {

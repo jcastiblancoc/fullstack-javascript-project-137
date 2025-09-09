@@ -38,8 +38,16 @@ export default {
   },
   devServer: {
     static: './dist',
-    port: 51952,
+    port: 8080,
     host: 'localhost',
+    client: {
+      overlay: false,
+      webSocketTransport: 'ws',
+      logging: 'none',
+    },
+    devMiddleware: {
+      writeToDisk: true,
+    },
   },
   mode: 'development',
 };
