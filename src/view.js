@@ -55,6 +55,7 @@ const renderAlert = (type, message) => {
   const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
   const alertElement = document.createElement('div');
   alertElement.className = `alert ${alertClass} alert-dismissible fade show`;
+  alertElement.style.display = 'block';
   alertElement.innerHTML = `
     ${message}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -66,6 +67,9 @@ const renderAlert = (type, message) => {
   
   // Insert alert at the beginning of feeds container
   feedsContainer.insertBefore(alertElement, feedsContainer.firstChild);
+  
+  // Force reflow for Firefox
+  alertElement.offsetHeight;
   
   // Auto-dismiss after 5 seconds
   setTimeout(() => {
