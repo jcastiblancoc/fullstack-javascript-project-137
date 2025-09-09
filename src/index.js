@@ -58,6 +58,7 @@ const initApp = async () => {
     e.preventDefault();
 
     const url = input.value.trim();
+    console.log('Form submitted with URL:', url);
     
     if (!url) {
       watchedState.form.isValid = false;
