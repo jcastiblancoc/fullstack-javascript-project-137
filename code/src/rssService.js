@@ -107,6 +107,17 @@ export class RSSService {
       
       let xmlContent = content;
       
+      // Handle base64 encoded content from AllOrigins proxy
+      if (content.startsWith('data:application/rss+xml; charset=UTF-8;base64,')) {
+        try {
+          const base64Data = content.replace('data:application/rss+xml; charset=UTF-8;base64,', '');
+          xmlContent = atob(base64Data);
+          console.log('Decoded base64 content:', xmlContent.substring(0, 500));
+        } catch (error) {
+          console.log('Failed to decode base64 content:', error);
+        }
+      }
+      
       // Handle All Origins proxy response format
       if (content.startsWith('{')) {
         try {

@@ -31,7 +31,7 @@
       "markAsRead": "Mark as read"
     },
     "messages": {
-      "success": "RSS loaded successfully",
+      "success": "RSS has been loaded",
       "networkError": "Network error",
       "timeout": "Request timeout - server took too long to respond",
       "invalidFormat": "The resource does not contain a valid RSS",
