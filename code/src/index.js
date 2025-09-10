@@ -44,7 +44,12 @@ const initApp = async () => {
         const existingFeeds = dataStore.getAllFeeds();
         console.log('Real-time validation - existing feeds:', existingFeeds.length);
         console.log('Real-time validation - current URL:', url);
-        const isDuplicate = existingFeeds.some(feed => feed.originalUrl === url || feed.link === url);
+        console.log('Real-time validation - last added URL:', window.lastAddedUrl);
+        
+        // Check both dataStore and recently added URL
+        const isDuplicate = existingFeeds.some(feed => feed.originalUrl === url || feed.link === url) || 
+                           (window.lastAddedUrl && window.lastAddedUrl === url);
+        
         console.log('Real-time validation - is duplicate?', isDuplicate);
         if (isDuplicate) {
           console.log('Duplicate detected in real-time validation, showing alert with text: RSS already exists');
@@ -158,6 +163,10 @@ const initApp = async () => {
       watchedState.form.url = '';
       watchedState.form.isValid = true;
       watchedState.form.errors = [];
+      watchedState.form.isSubmitting = false;
+      
+      // Store the last added URL for immediate duplicate detection
+      window.lastAddedUrl = url;
       
     } catch (error) {
       console.error('Form submission error:', error);
