@@ -13,9 +13,9 @@ const yupLocale = {
 
 yup.setLocale(yupLocale);
 
-// Create validation function like the working project
+// Create validation function exactly like the working project
 export const validateUrl = (url, feeds) => {
-  const feedUrls = feeds.map((feed) => feed.url || feed.originalUrl);
+  const feedUrls = feeds.map((feed) => feed.url);
   const baseUrlSchema = yup.string().url().required();
   const actualUrlSchema = baseUrlSchema.notOneOf(feedUrls);
   

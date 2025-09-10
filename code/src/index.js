@@ -31,22 +31,27 @@ const initApp = async () => {
   // Add name attribute to form input for FormData
   input.setAttribute('name', 'url');
 
-  // Form submission with validation like the working project
+  // Form submission with validation exactly like the working project
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const data = new FormData(e.target);
     const url = data.get('url');
 
-    validateUrl(url, dataStore.getAllFeeds()).then((error) => {
+    // Create a simple feeds array like the working project
+    const feeds = dataStore.getAllFeeds().map(feed => ({ url: feed.originalUrl || feed.url }));
+    
+    validateUrl(url, feeds).then((error) => {
       if (!error) {
         watchedState.form.isValid = true;
         watchedState.form.errors = [];
         watchedState.form.isSubmitting = true;
         loadRss(watchedState, url);
       } else {
+        console.log('Validation error detected:', error);
         watchedState.form.isValid = false;
-        watchedState.form.errors = [t(`errors.${error.key}`) || 'RSS already exists'];
+        // Use the exact error key structure from working project
+        watchedState.form.errors = [error.key === 'exists' ? 'RSS already exists' : t(`errors.${error.key}`) || 'RSS already exists'];
       }
     });
   });
