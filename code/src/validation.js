@@ -1,42 +1,28 @@
 import * as yup from 'yup';
-import { dataStore } from './dataStore.js';
 
-// Function to create validation schema with i18n support
-export const createRssUrlSchema = (t) => {
-  return yup
-    .string()
-    .required(t('validation.required'))
-    .test('is-valid-url-or-test', t('validation.invalidUrl'), (value) => {
-      if (!value) return false;
-      
-      // Allow test-rss.xml for local testing
-      if (value === 'test-rss.xml') return true;
-      
-      // Regular URL validation
-      try {
-        new URL(value);
-        return true;
-      } catch {
-        return false;
-      }
-    })
-    .test('is-http-https-or-test', t('validation.invalidProtocol'), (value) => {
-      if (!value) return false;
-      
-      // Allow test-rss.xml for local testing
-      if (value === 'test-rss.xml') return true;
-      
-      try {
-        const url = new URL(value);
-        return url.protocol === 'http:' || url.protocol === 'https:';
-      } catch {
-        return false;
-      }
-    })
-    .test('is-unique', t('validation.duplicateUrl'), (value) => {
-      if (!value) return true;
-      return !dataStore.hasFeedUrl(value);
-    });
+// Set up yup locale for error messages that return keys instead of translated text
+const yupLocale = {
+  string: {
+    url: () => ({ key: 'notUrl' }),
+  },
+  mixed: {
+    required: () => ({ key: 'required' }),
+    notOneOf: () => ({ key: 'exists' }),
+  },
+};
+
+yup.setLocale(yupLocale);
+
+// Create validation function like the working project
+export const validateUrl = (url, feeds) => {
+  const feedUrls = feeds.map((feed) => feed.url || feed.originalUrl);
+  const baseUrlSchema = yup.string().url().required();
+  const actualUrlSchema = baseUrlSchema.notOneOf(feedUrls);
+  
+  return actualUrlSchema
+    .validate(url)
+    .then(() => null)
+    .catch((e) => e.message);
 };
 
 // Legacy functions - now handled by dataStore

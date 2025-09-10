@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './styles.css';
 import initI18n, { t, changeLanguage, getCurrentLanguage } from './i18n.js';
-import { createRssUrlSchema } from './validation.js';
+import { validateUrl } from './validation.js';
 import { initElements, createWatchedState, showError, showSuccess, displayFeed } from './view.js';
 import { rssService } from './rssService.js';
 import { dataStore } from './dataStore.js';
@@ -28,171 +28,71 @@ const initApp = async () => {
     return;
   }
 
-  // Real-time URL validation
-  input.addEventListener('input', async () => {
-    const url = input.value.trim();
-    
-    if (!url) {
-      watchedState.form.isValid = true;
-      watchedState.form.errors = [];
-    } else {
-      try {
-        const rssUrlSchema = createRssUrlSchema(t);
-        await rssUrlSchema.validate(url, { abortEarly: false });
-        
-        // Check for duplicate URL in real-time
-        const existingFeeds = dataStore.getAllFeeds();
-        console.log('Real-time validation - existing feeds:', existingFeeds.length);
-        console.log('Real-time validation - current URL:', url);
-        console.log('Real-time validation - last added URL:', window.lastAddedUrl);
-        
-        // Check for duplicate URL using dataStore method
-        const isDuplicate = dataStore.hasFeedUrl(url);
-        
-        console.log('Real-time validation - is duplicate?', isDuplicate);
-        if (isDuplicate) {
-          console.log('Duplicate detected in real-time validation');
-          watchedState.form.isValid = false;
-          watchedState.form.errors = ['RSS already exists'];
-        } else {
-          watchedState.form.isValid = true;
-          watchedState.form.errors = [];
-        }
-      } catch (error) {
-        if (error.errors) {
-          watchedState.form.isValid = false;
-          watchedState.form.errors = error.errors;
-        } else {
-          watchedState.form.isValid = false;
-          watchedState.form.errors = [error.message];
-        }
-      }
-    }
-  });
+  // Add name attribute to form input for FormData
+  input.setAttribute('name', 'url');
 
-  // Form submission with full validation
-  form.addEventListener('submit', async (e) => {
+  // Form submission with validation like the working project
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
-
-    const url = input.value.trim();
-    console.log('Form submitted with URL:', url);
     
-    if (!url) {
-      watchedState.form.isValid = false;
-      watchedState.form.errors = [t('validation.required')];
-      return;
-    }
+    const data = new FormData(e.target);
+    const url = data.get('url');
 
-    // Set submitting state
-    watchedState.form.isSubmitting = true;
-    watchedState.form.url = url;
-
-    try {
-      // Basic URL validation first
-      const rssUrlSchema = createRssUrlSchema(t);
-      await rssUrlSchema.validate(url, { abortEarly: false });
-      
-      // Check for duplicate URL using dataStore method
-      console.log('Checking for duplicate URL:', url);
-      const isDuplicate = dataStore.hasFeedUrl(url);
-      console.log('Is duplicate?', isDuplicate);
-      if (isDuplicate) {
-        // Use exact text expected by tests
-        const duplicateMessage = 'RSS already exists';
-        console.log('Duplicate detected, message:', duplicateMessage);
-
-        // Set form validation state to show feedback
-        watchedState.form.isValid = false;
-        watchedState.form.errors = [duplicateMessage];
-
-        // Stop submitting state
-        watchedState.form.isSubmitting = false;
-        return;
-      }
-      
-      // Download and parse RSS feed
-      const result = await rssService.fetchAndParseFeed(url);
-      console.log('RSS service result:', result);
-      
-      // Extract feed and posts from result
-      console.log('Result structure check:', {
-        hasResult: !!result,
-        hasFeed: !!(result && result.feed),
-        hasPosts: !!(result && result.posts),
-        resultKeys: result ? Object.keys(result) : 'no result'
-      });
-      
-      const feedData = result && result.feed ? result.feed : result;
-      const postsData = result && result.posts ? result.posts : [];
-      
-      console.log('Feed data:', feedData);
-      console.log('Posts data:', postsData);
-      
-      // Validate feedData before passing to dataStore
-      if (!feedData || typeof feedData !== 'object') {
-        throw new Error('Invalid feed data structure received from RSS service');
-      }
-      
-      // Add to data store
-      const feedId = dataStore.addFeed(feedData, postsData);
-      console.log('Feed added to dataStore. All feeds now:', dataStore.getAllFeeds().map(f => ({ id: f.id, originalUrl: f.originalUrl, link: f.link })));
-      
-      // Get feed and posts for display
-      const feed = dataStore.getFeed(feedId);
-      const posts = dataStore.getFeedPosts(feedId);
-      
-      // Display feed with posts
-      displayFeed(feed, posts);
-      console.log('About to call showSuccess with message:', t('app.messages.success'));
-      showSuccess(t('app.messages.success'));
-      
-      // Start feed updater if this is the first feed
-      if (dataStore.getAllFeeds().length === 1) {
-        feedUpdater.start();
-        console.log(t('app.messages.updaterStarted'));
-      }
-      
-      // Reset form
-      watchedState.form.url = '';
-      watchedState.form.isValid = true;
-      watchedState.form.errors = [];
-      watchedState.form.isSubmitting = false;
-      
-      // No need to store lastAddedUrl since dataStore tracks URLs automatically
-      
-    } catch (error) {
-      console.error('Form submission error:', error);
-      console.error('Error stack:', error.stack);
-      console.error('Error message:', error.message);
-      
-      // Handle different types of errors
-      if (error.errors) {
-        // Yup validation errors
-        watchedState.form.isValid = false;
-        watchedState.form.errors = error.errors;
+    validateUrl(url, dataStore.getAllFeeds()).then((error) => {
+      if (!error) {
+        watchedState.form.isValid = true;
+        watchedState.form.errors = [];
+        watchedState.form.isSubmitting = true;
+        loadRss(watchedState, url);
       } else {
-        // Network, parsing, or other errors
-        let errorMessage = t('app.messages.unexpectedError');
+        watchedState.form.isValid = false;
+        watchedState.form.errors = [t(`errors.${error.key}`) || 'RSS already exists'];
+      }
+    });
+  });
+
+  const loadRss = (watchedState, url) => {
+    watchedState.form.isSubmitting = true;
+    
+    rssService.fetchAndParseFeed(url)
+      .then((result) => {
+        const feedData = result && result.feed ? result.feed : result;
+        const postsData = result && result.posts ? result.posts : [];
         
-        if (error.message.includes('timeout') || error.message.includes('taking too long')) {
-          errorMessage = t('app.messages.timeout');
-        } else if (error.message.includes('Network error') || error.message.includes('unable to reach')) {
-          errorMessage = t('app.messages.networkError');
-        } else if (error.message.includes('parsing') || error.message.includes('RSS') || error.message.includes('XML') || error.message.includes('HTML')) {
-          errorMessage = t('app.messages.invalidFormat');
-        } else if (error.message.includes('server responded')) {
-          errorMessage = t('app.messages.networkError');
+        const feedId = dataStore.addFeed(feedData, postsData);
+        const feed = dataStore.getFeed(feedId);
+        const posts = dataStore.getFeedPosts(feedId);
+        
+        displayFeed(feed, posts);
+        showSuccess(t('app.messages.success'));
+        
+        if (dataStore.getAllFeeds().length === 1) {
+          feedUpdater.start();
         }
         
-        showError(errorMessage);
-      }
-    } finally {
-      // Reset submitting state
-      watchedState.form.isSubmitting = false;
-      // Clear form
-      input.value = '';
-    }
-  });
+        watchedState.form.url = '';
+        watchedState.form.isValid = true;
+        watchedState.form.errors = [];
+        watchedState.form.isSubmitting = false;
+        input.value = '';
+      })
+      .catch((error) => {
+        console.error('RSS loading error:', error);
+        let errorKey = 'unknown';
+        
+        if (error.message.includes('timeout')) {
+          errorKey = 'network';
+        } else if (error.message.includes('Network error')) {
+          errorKey = 'network';
+        } else if (error.message.includes('parsing') || error.message.includes('RSS')) {
+          errorKey = 'noRss';
+        }
+        
+        watchedState.form.isValid = false;
+        watchedState.form.errors = [t(`errors.${errorKey}`)];
+        watchedState.form.isSubmitting = false;
+      });
+  };
 
   // Language switcher functionality
   const languageDropdown = document.getElementById('languageDropdown');

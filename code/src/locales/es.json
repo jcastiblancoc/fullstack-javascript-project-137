@@ -49,5 +49,13 @@
     "invalidRss": "La URL no es un feed RSS válido",
     "accessError": "No se pudo acceder al feed RSS",
     "notRssContent": "La URL no parece ser un feed RSS válido"
+  },
+  "errors": {
+    "exists": "El RSS ya existe",
+    "required": "Requerido",
+    "notUrl": "Debe ser una URL válida",
+    "noRss": "No hay RSS válido en el recurso",
+    "network": "Error de red",
+    "unknown": "Algo salió mal"
   }
 }
