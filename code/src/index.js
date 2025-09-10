@@ -46,9 +46,8 @@ const initApp = async () => {
         console.log('Real-time validation - current URL:', url);
         console.log('Real-time validation - last added URL:', window.lastAddedUrl);
         
-        // Check both dataStore and recently added URL
-        const isDuplicate = existingFeeds.some(feed => feed.originalUrl === url || feed.link === url) || 
-                           (window.lastAddedUrl && window.lastAddedUrl === url);
+        // Check for duplicate URL using dataStore method
+        const isDuplicate = dataStore.hasFeedUrl(url);
         
         console.log('Real-time validation - is duplicate?', isDuplicate);
         if (isDuplicate) {
@@ -93,11 +92,9 @@ const initApp = async () => {
       const rssUrlSchema = createRssUrlSchema(t);
       await rssUrlSchema.validate(url, { abortEarly: false });
       
-      // Check for duplicate URL
-      const existingFeeds = dataStore.getAllFeeds();
-      console.log('Checking for duplicates. Existing feeds:', existingFeeds.map(f => ({ originalUrl: f.originalUrl, link: f.link })));
-      console.log('Current URL:', url);
-      const isDuplicate = existingFeeds.some(feed => feed.originalUrl === url || feed.link === url);
+      // Check for duplicate URL using dataStore method
+      console.log('Checking for duplicate URL:', url);
+      const isDuplicate = dataStore.hasFeedUrl(url);
       console.log('Is duplicate?', isDuplicate);
       if (isDuplicate) {
         // Use exact text expected by tests
@@ -161,8 +158,7 @@ const initApp = async () => {
       watchedState.form.errors = [];
       watchedState.form.isSubmitting = false;
       
-      // Store the last added URL for immediate duplicate detection
-      window.lastAddedUrl = url;
+      // No need to store lastAddedUrl since dataStore tracks URLs automatically
       
     } catch (error) {
       console.error('Form submission error:', error);
