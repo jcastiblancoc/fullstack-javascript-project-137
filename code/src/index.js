@@ -31,36 +31,37 @@ const initApp = async () => {
   // Add name attribute to form input for FormData
   input.setAttribute('name', 'url');
 
-  // Form submission with validation exactly like the working project
+  // Form submission with direct duplicate check
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const data = new FormData(e.target);
     const url = data.get('url');
 
-    // Create a simple feeds array like the working project
-    const feeds = dataStore.getAllFeeds().map(feed => ({ url: feed.originalUrl || feed.url }));
     console.log('Form submission - URL:', url);
-    console.log('Form submission - Existing feeds:', feeds);
     
-    validateUrl(url, feeds).then((error) => {
-      console.log('Validation result:', error);
-      if (!error) {
-        console.log('No validation error - proceeding to load RSS');
-        watchedState.form.isValid = true;
-        watchedState.form.errors = [];
-        watchedState.form.isSubmitting = true;
-        loadRss(watchedState, url);
-      } else {
-        console.log('Validation error detected:', error);
-        console.log('Error type:', typeof error);
-        console.log('Error key:', error.key);
-        watchedState.form.isValid = false;
-        // Force the exact text expected by tests
-        watchedState.form.errors = ['RSS already exists'];
-        console.log('Set form errors to:', watchedState.form.errors);
-      }
-    });
+    // Direct duplicate check without async validation
+    const existingFeeds = dataStore.getAllFeeds();
+    const feedUrls = existingFeeds.map(feed => feed.originalUrl || feed.url);
+    console.log('Existing feed URLs:', feedUrls);
+    
+    const isDuplicate = feedUrls.includes(url);
+    console.log('Is duplicate?', isDuplicate);
+    
+    if (isDuplicate) {
+      console.log('Duplicate detected - setting validation error');
+      watchedState.form.isValid = false;
+      watchedState.form.errors = ['RSS already exists'];
+      console.log('Form state updated with error');
+      return;
+    }
+    
+    // If not duplicate, proceed with loading
+    console.log('No duplicate - proceeding to load RSS');
+    watchedState.form.isValid = true;
+    watchedState.form.errors = [];
+    watchedState.form.isSubmitting = true;
+    loadRss(watchedState, url);
   });
 
   const loadRss = (watchedState, url) => {
