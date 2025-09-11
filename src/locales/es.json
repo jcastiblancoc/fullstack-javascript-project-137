@@ -45,7 +45,7 @@
     "required": "No debe estar vacío",
     "invalidUrl": "El enlace debe ser una URL válida",
     "invalidProtocol": "La URL debe usar protocolo HTTP o HTTPS",
-    "duplicateUrl": "El RSS ya existe",
+    "duplicateUrl": "RSS already exists",
     "invalidRss": "La URL no es un feed RSS válido",
     "accessError": "No se pudo acceder al feed RSS",
     "notRssContent": "La URL no parece ser un feed RSS válido"
