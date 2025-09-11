@@ -51,8 +51,8 @@ const initApp = async () => {
     if (isDuplicate) {
       console.log('Duplicate detected - setting validation error');
       watchedState.form.isValid = false;
-      watchedState.form.errors = ['RSS already exists'];
-      console.log('Form state updated with error');
+      watchedState.form.errors = [t('validation.duplicateUrl')];
+      console.log('Form state updated with error:', t('validation.duplicateUrl'));
       return;
     }
     
