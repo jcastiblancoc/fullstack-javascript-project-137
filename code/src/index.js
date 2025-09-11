@@ -53,6 +53,27 @@ const initApp = async () => {
       watchedState.form.isValid = false;
       watchedState.form.errors = [t('validation.duplicateUrl')];
       console.log('Form state updated with error:', t('validation.duplicateUrl'));
+      
+      // Force immediate validation display update
+      const urlInput = document.getElementById('rss-url');
+      if (urlInput) {
+        urlInput.classList.remove('is-valid');
+        urlInput.classList.add('is-invalid');
+        
+        let feedback = urlInput.parentElement.querySelector('.invalid-feedback');
+        if (!feedback) {
+          feedback = document.createElement('div');
+          feedback.className = 'invalid-feedback';
+          urlInput.parentElement.appendChild(feedback);
+        }
+        
+        feedback.textContent = t('validation.duplicateUrl');
+        feedback.style.display = 'block';
+        feedback.classList.add('d-block');
+        
+        console.log('Validation error displayed directly in DOM:', feedback.textContent);
+      }
+      
       return;
     }
     
