@@ -39,8 +39,8 @@ export class RSSService {
       
       // Try multiple proxy services for better reliability
       const proxyServices = [
+        `https://allorigins.hexlet.app/get?url=${encodeURIComponent(url)}&disableCache=true`,
         `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&disableCache=true`,
-        `https://cors-anywhere.herokuapp.com/${url}`,
         `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
       ];
       
@@ -53,8 +53,7 @@ export class RSSService {
           response = await axios.get(proxyUrl, {
             timeout: 15000,
             headers: {
-              'Accept': 'application/rss+xml, application/xml, text/xml, application/json',
-              'User-Agent': 'RSS-Aggregator/1.0'
+              'Accept': 'application/rss+xml, application/xml, text/xml, application/json'
             }
           });
           
@@ -65,6 +64,15 @@ export class RSSService {
           }
           
           console.log('Successfully fetched from proxy:', proxyUrl.split('?')[0]);
+          console.log('Downloaded content length:', content ? content.length : 0);
+          console.log('Full content received (first 1000 chars):', content ? content.substring(0, 1000) : '');
+          
+          // Check if content is empty or invalid
+          if (!content || content.trim().length === 0) {
+            console.log('Empty content from proxy, trying next...');
+            throw new Error('Empty content received from proxy');
+          }
+          
           return content;
           
         } catch (error) {
