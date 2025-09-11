@@ -16,13 +16,21 @@ yup.setLocale(yupLocale);
 // Create validation function exactly like the working project
 export const validateUrl = (url, feeds) => {
   const feedUrls = feeds.map((feed) => feed.url);
+  console.log('validateUrl called with:', { url, feedUrls });
   const baseUrlSchema = yup.string().url().required();
   const actualUrlSchema = baseUrlSchema.notOneOf(feedUrls);
   
   return actualUrlSchema
     .validate(url)
-    .then(() => null)
-    .catch((e) => e.message);
+    .then(() => {
+      console.log('Validation passed - no error');
+      return null;
+    })
+    .catch((e) => {
+      console.log('Validation failed:', e);
+      console.log('Error message:', e.message);
+      return e.message;
+    });
 };
 
 // Legacy functions - now handled by dataStore
