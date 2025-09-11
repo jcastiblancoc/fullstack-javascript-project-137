@@ -42,11 +42,18 @@ const initApp = async () => {
     
     // Direct duplicate check without async validation
     const existingFeeds = dataStore.getAllFeeds();
-    const feedUrls = existingFeeds.map(feed => feed.originalUrl || feed.url);
+    console.log('All existing feeds:', existingFeeds);
+    const feedUrls = existingFeeds.map(feed => {
+      console.log('Feed object:', feed);
+      // Check both originalUrl and url properties to match what's stored
+      const feedUrl = feed.originalUrl || feed.url;
+      console.log('Feed URL extracted:', feedUrl);
+      return feedUrl;
+    });
     console.log('Existing feed URLs:', feedUrls);
     
     const isDuplicate = feedUrls.includes(url);
-    console.log('Is duplicate?', isDuplicate);
+    console.log('Is duplicate?', isDuplicate, 'URL to check:', url, 'Against URLs:', feedUrls);
     
     if (isDuplicate) {
       console.log('Duplicate detected - setting validation error');
