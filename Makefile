@@ -1,16 +1,19 @@
 install:
-	npm ci
+	npm install
 
-lint:
-	npm run lint
-
-test:
-	npm test
+start:
+	npx webpack serve
 
 build:
 	npm run build
 
-dev:
-	npm run dev
+test:
+	npm test -s
 
-.PHONY: install lint test build dev
+test-coverage:
+	npm test -- --coverage
+
+lint:
+	npx eslint .
+lint-fix:
+	npx eslint . --fix
