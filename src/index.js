@@ -1,11 +1,12 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { buildSchema } from './validation.js';
 import initView from './view.js';
+import initI18n from './i18n.js';
+import { configureYup, buildSchema } from './validation.js';
 
 const state = {
   feeds: [],
   form: {
-    error: null,
+    error: null,   // aquí guardamos solo el "código" del error (ej. 'url', 'required')
     success: false,
   },
 };
@@ -18,22 +19,31 @@ const elements = {
 
 elements.input.after(elements.feedback);
 
-const watchedState = initView(state, elements);
+initI18n().then((i18n) => {
+  configureYup(i18n);
 
-elements.form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const url = elements.input.value.trim();
+  const watchedState = initView(state, elements, i18n);
 
-  const schema = buildSchema(state.feeds);
+  elements.form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const url = elements.input.value.trim();
 
-  schema.validate(url)
-    .then((validatedUrl) => {
-      state.feeds.push(validatedUrl);
-      watchedState.form.error = null;
-      watchedState.form.success = true;
-    })
-    .catch((err) => {
-      watchedState.form.error = err.message;
-      watchedState.form.success = false;
-    });
+    const schema = buildSchema(state.feeds);
+
+    schema.validate(url)
+      .then((validatedUrl) => {
+        state.feeds.push(validatedUrl);
+        watchedState.form.error = null;
+        watchedState.form.success = true;
+      })
+      .catch((err) => {
+        // guardamos la "clave" del error, no el texto
+        if (err.type === 'required') watchedState.form.error = 'required';
+        else if (err.type === 'notOneOf') watchedState.form.error = 'notOneOf';
+        else if (err.type === 'url') watchedState.form.error = 'url';
+        else watchedState.form.error = 'default';
+
+        watchedState.form.success = false;
+      });
+  });
 });

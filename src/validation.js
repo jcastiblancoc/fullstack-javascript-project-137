@@ -1,8 +1,20 @@
 import * as yup from 'yup';
 
+export const configureYup = (i18n) => {
+  yup.setLocale({
+    mixed: {
+      required: i18n.t('errors.required'),
+      notOneOf: i18n.t('errors.notOneOf'),
+    },
+    string: {
+      url: i18n.t('errors.url'),
+    },
+  });
+};
+
 export const buildSchema = (existingUrls) => (
   yup.string()
-    .required('La URL es obligatoria')
-    .url('La URL no es válida')
-    .notOneOf(existingUrls, 'El feed ya fue agregado')
+    .required()
+    .url()
+    .notOneOf(existingUrls)
 );
