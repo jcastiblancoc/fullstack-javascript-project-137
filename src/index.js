@@ -3,6 +3,10 @@ import initView from './view.js';
 import initI18n from './i18n.js';
 import { configureYup, buildSchema } from './validation.js';
 
+import app from './app.js';
+
+app();
+
 const state = {
   feeds: [],
   form: {

@@ -4,21 +4,16 @@
   <meta charset="UTF-8">
   <title>RSS Reader</title>
 </head>
-<body class="container mt-5">
+<body class="container py-5">
   <h1 class="mb-4">RSS Reader</h1>
-  <form id="rss-form" class="row g-3">
-    <div class="col-auto">
-      <input 
-        type="text" 
-        class="form-control" 
-        id="rss-input" 
-        placeholder="Ingrese URL RSS"
-        aria-label="RSS input">
-    </div>
-    <div class="col-auto">
-      <button type="submit" class="btn btn-primary">Agregar</button>
+  <form class="rss-form mb-3">
+    <div class="input-group">
+      <input name="url" type="text" class="form-control" placeholder="https://example.com/feed.xml" required>
+      <button type="submit" class="btn btn-primary">Añadir</button>
     </div>
   </form>
-  
+  <p class="feedback small"></p>
+  <div class="feeds"></div>
+  <div class="posts"></div>
 </body>
 </html>
