@@ -1,4 +1,10 @@
 import { test, expect } from '@playwright/test';
+// tests/rss-aggregator.spec.js
+import { screen, waitFor } from '@testing-library/dom';
+import '@testing-library/jest-dom';
+import { JSDOM } from 'jsdom';
+import fs from 'fs';
+import path from 'path';
 
 test.describe('RSS Aggregator', () => {
   test.beforeEach(async ({ page }) => {

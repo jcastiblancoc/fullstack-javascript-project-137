@@ -1,42 +1,67 @@
 // Normalized data structure for feeds and posts
+// src/dataStore.js
 class DataStore {
   constructor() {
-    this.feeds = new Map(); // feedId -> feed object
-    this.posts = new Map(); // postId -> post object
-    this.feedPosts = new Map(); // feedId -> Set of postIds
-    this.feedUrls = new Set(); // Track added feed URLs for duplicates
-    this.readPosts = new Set(); // Track read post IDs
+    this.feeds = new Map();
+    this.posts = new Map();
+    this.feedPosts = new Map();
+    this.feedUrls = new Map();
   }
 
-  // Add a new feed with its posts
+  normalizeUrl(url) {
+    if (!url) return '';
+    try {
+      const urlObj = new URL(url);
+      return `${urlObj.protocol}//${urlObj.hostname}${urlObj.pathname}`
+        .replace(/\/+$/, '')
+        .toLowerCase();
+    } catch (e) {
+      return url.toLowerCase().trim();
+    }
+  }
+
+  hasUrl(url) {
+    if (!url) return false;
+    const normalizedUrl = this.normalizeUrl(url);
+    return this.feedUrls.has(normalizedUrl);
+  }
+
   addFeed(feed, posts = []) {
-    console.log('DataStore.addFeed called with:', { feed, posts });
-    
-    // Validate feed object
-    if (!feed || typeof feed !== 'object') {
-      throw new Error('Feed must be a valid object');
+    if (!feed?.id) {
+      throw new Error('Invalid feed object');
     }
-    
-    if (!feed.id) {
-      throw new Error('Feed must have an id property');
+
+    // Check for duplicates
+    if (this.hasUrl(feed.url) || (feed.originalUrl && this.hasUrl(feed.originalUrl))) {
+      throw new Error('DUPLICATE_URL');
     }
-    
+
     // Store feed
     this.feeds.set(feed.id, feed);
-    this.feedUrls.add(feed.originalUrl);
     
-    // Store posts and create feed-posts relationship
+    // Store normalized URLs
+    const normalizedUrl = this.normalizeUrl(feed.url);
+    this.feedUrls.set(normalizedUrl, feed.id);
+    
+    if (feed.originalUrl) {
+      const normalizedOriginalUrl = this.normalizeUrl(feed.originalUrl);
+      this.feedUrls.set(normalizedOriginalUrl, feed.id);
+    }
+
+    // Store posts
     const postIds = new Set();
-    posts.forEach(post => {
+    posts.forEach((post) => {
       const postWithFeedId = { ...post, feedId: feed.id };
       this.posts.set(post.id, postWithFeedId);
       postIds.add(post.id);
     });
-    
     this.feedPosts.set(feed.id, postIds);
-    
+
     return feed.id;
   }
+
+  // ... rest of the methods
+}
 
   // Get feed by ID
   getFeed(feedId) {

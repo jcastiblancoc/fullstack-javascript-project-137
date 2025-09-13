@@ -273,3 +273,37 @@ const populatePreviewModal = (post) => {
   const closeButton = modal.querySelector('.modal-footer .btn-secondary');
   if (closeButton) closeButton.textContent = t('app.posts.close');
 };
+
+// src/view.js
+const renderFormState = (state) => {
+  const { form } = state;
+  const urlInput = document.getElementById('rss-url');
+  const submitButton = document.querySelector('button[type="submit"]');
+  
+  if (!urlInput || !submitButton) return;
+
+  // Update input validation state
+  urlInput.classList.toggle('is-valid', form.isValid && urlInput.value);
+  urlInput.classList.toggle('is-invalid', !form.isValid && form.errors?.length > 0);
+
+  // Update error message
+  let feedback = urlInput.nextElementSibling;
+  if (form.errors?.length > 0) {
+    if (!feedback?.classList?.contains('invalid-feedback')) {
+      feedback = document.createElement('div');
+      feedback.className = 'invalid-feedback d-block';
+      urlInput.parentNode.insertBefore(feedback, urlInput.nextSibling);
+    }
+    [feedback.textContent] = form.errors;
+  } else if (feedback?.classList?.contains('invalid-feedback')) {
+    feedback.remove();
+  }
+
+  // Update submit button state
+  submitButton.disabled = form.isSubmitting;
+  submitButton.innerHTML = form.isSubmitting 
+    ? `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${t('app.form.processing')}`
+    : t('app.form.submitButton');
+};
+
+// ... rest of the file

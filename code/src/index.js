@@ -7,6 +7,14 @@ import { initElements, createWatchedState, showError, showSuccess, displayFeed }
 import { rssService } from './rssService.js';
 import { dataStore } from './dataStore.js';
 import { feedUpdater } from './feedUpdater.js';
+import i18n from 'i18next';
+import { setLocale } from 'yup';
+import * as yup from 'yup';
+import { validateUrl, showError } from './validation'; // Keep imports even if unused for now
+import DataStore from './dataStore';
+import RssService from './rssService';
+import { initView, renderFormState } from './view';
+import resources from './locales';
 
 // Initialize the application
 const initApp = async () => {
