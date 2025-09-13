@@ -21,7 +21,9 @@
   },
   "homepage": "https://github.com/jcastiblancoc/fullstack-javascript-project-137#readme",
   "dependencies": {
-    "bootstrap": "^5.3.8"
+    "bootstrap": "^5.3.8",
+    "on-change": "^5.0.1",
+    "yup": "^1.7.0"
   },
   "devDependencies": {
     "css-loader": "^7.1.2",

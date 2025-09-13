@@ -1,24 +1,39 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { buildSchema } from './validation.js';
+import initView from './view.js';
 
-const form = document.getElementById('rss-form');
-const input = document.getElementById('rss-input');
+const state = {
+  feeds: [],
+  form: {
+    error: null,
+    success: false,
+  },
+};
 
-form.addEventListener('submit', (e) => {
+const elements = {
+  form: document.getElementById('rss-form'),
+  input: document.getElementById('rss-input'),
+  feedback: document.createElement('div'),
+};
+
+elements.input.after(elements.feedback);
+
+const watchedState = initView(state, elements);
+
+elements.form.addEventListener('submit', (e) => {
   e.preventDefault();
-  const url = input.value.trim();
+  const url = elements.input.value.trim();
 
-  // ⚠️ Solo promesas, no async/await
-  new Promise((resolve, reject) => {
-    if (url) {
-      resolve(url);
-    } else {
-      reject(new Error('URL vacía'));
-    }
-  })
-    .then((res) => {
-      console.log(`Agregado: ${res}`);
+  const schema = buildSchema(state.feeds);
+
+  schema.validate(url)
+    .then((validatedUrl) => {
+      state.feeds.push(validatedUrl);
+      watchedState.form.error = null;
+      watchedState.form.success = true;
     })
     .catch((err) => {
-      console.error(err.message);
+      watchedState.form.error = err.message;
+      watchedState.form.success = false;
     });
 });
