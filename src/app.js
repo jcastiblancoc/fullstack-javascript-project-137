@@ -1,11 +1,6 @@
-// src/app.js
 import onChange from 'on-change';
 import render from './render.js';
-import { configureYup, buildSchema } from './validation.js';
-import i18next from 'i18next';
-
-// Configura mensajes de validación
-configureYup(i18next);
+import { buildSchema } from './validation.js';
 
 export default () => {
   const elements = {
@@ -45,6 +40,7 @@ export default () => {
         elements.form.reset();
       })
       .catch((err) => {
+        // Manejo manual de mensajes exactos esperados por Playwright
         if (err.name === 'ValidationError') {
           switch (err.type) {
             case 'url':
