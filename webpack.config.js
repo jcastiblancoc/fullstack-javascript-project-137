@@ -24,7 +24,9 @@ export default {
   devServer: {
     static: './dist',
     open: false,
-    port: 8080, // opcional: definir puerto explícito
+    port: 8080,
+    devMiddleware: { writeToDisk: true },
+    watchFiles: ['src/**/*', 'index.html'],
   },
   mode: 'development',
 };
