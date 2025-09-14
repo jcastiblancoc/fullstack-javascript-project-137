@@ -27,6 +27,7 @@
     "i18next": "^25.5.2",
     "lodash.uniqueid": "^4.0.1",
     "on-change": "^5.0.1",
+    "wsl-utils": "^0.1.0",
     "yup": "^1.7.0"
   },
   "devDependencies": {
