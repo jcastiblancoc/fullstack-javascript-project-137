@@ -11,6 +11,10 @@ export default () => {
     feedsContainer: document.querySelector('.feeds'),
     postsContainer: document.querySelector('.posts'),
     feedback: document.querySelector('.feedback'),
+    modal: document.getElementById('modal'), // modal Bootstrap
+    modalTitle: document.querySelector('.modal-title'),
+    modalBody: document.querySelector('.modal-body'),
+    modalLink: document.querySelector('.full-article'),
   };
 
   const state = initState(elements);

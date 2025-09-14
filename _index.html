@@ -1,19 +1,16 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>RSS Reader</title>
-</head>
-<body class="container py-5">
-  <h1 class="mb-4">RSS Reader</h1>
-  <form class="rss-form mb-3">
-    <div class="input-group">
-      <input name="url" type="text" class="form-control" placeholder="https://example.com/feed.xml" required>
-      <button type="submit" class="btn btn-primary">Añadir</button>
+<!-- Modal -->
+<div class="modal fade" id="modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <a href="#" class="btn btn-primary full-article" target="_blank" rel="noopener noreferrer">Artículo completo</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
     </div>
-  </form>
-  <p class="feedback small"></p>
-  <div class="feeds"></div>
-  <div class="posts"></div>
-</body>
-</html>
+  </div>
+</div>
