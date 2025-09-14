@@ -10,7 +10,7 @@ export default {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './_index.html',
+      template: './index.html', // cambiar de _index.html a index.html
     }),
   ],
   module: {
@@ -23,8 +23,8 @@ export default {
   },
   devServer: {
     static: './dist',
-    // Cambiamos `open: true` porque en CI con Playwright no hay navegador
     open: false,
+    port: 8080, // opcional: definir puerto explícito
   },
   mode: 'development',
 };
