@@ -33,15 +33,35 @@ export default () => {
 
     schema.validate(url)
       .then(() => {
-        // Si pasa validación, añadir feed
-        watchedState.feeds.push({ url });
-        watchedState.form.success = 'RSS has been loaded';
+        // Añadimos feed si pasa validación
+        watchedState.feeds.push({
+          url,
+          title: url,        // necesario para render
+          description: '',   // necesario para render
+        });
+
+        watchedState.form.success = 'RSS has been loaded'; // mensaje exacto esperado
         watchedState.form.error = null;
         elements.form.reset();
       })
       .catch((err) => {
-        // Si hay error de validación, mostrarlo
-        watchedState.form.error = err.message;
+        if (err.name === 'ValidationError') {
+          switch (err.type) {
+            case 'url':
+              watchedState.form.error = 'Must be valid URL';
+              break;
+            case 'required':
+              watchedState.form.error = 'URL is required';
+              break;
+            case 'notOneOf':
+              watchedState.form.error = 'RSS already exists';
+              break;
+            default:
+              watchedState.form.error = err.message;
+          }
+        } else {
+          watchedState.form.error = err.message;
+        }
         watchedState.form.success = null;
       });
   });
