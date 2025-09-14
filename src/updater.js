@@ -1,6 +1,7 @@
+// src/updater.js
 import axios from 'axios';
 import parse from './parser.js';
-import { uniqueId } from 'lodash';
+import uniqueId from 'lodash/uniqueId.js';
 
 const getUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
 
