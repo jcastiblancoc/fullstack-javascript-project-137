@@ -1,77 +1,57 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import initView from './view.js';
-import initI18n from './i18n.js';
-import { configureYup, buildSchema } from './validation.js';
-import parse from './parser.js';
-import axios from 'axios';
-import { uniqueId } from 'lodash';
-import updateFeeds from './updater.js';
+/* eslint-disable no-console */
 
+const form = document.getElementById('rss-form');
+const input = form.querySelector('input[aria-label="url"]');
+const feedsContainer = document.querySelector('#feeds ul');
+const postsContainer = document.querySelector('#posts ul');
+
+// Estado mínimo simulado
 const state = {
   feeds: [],
   posts: [],
-  form: {
-    error: null,
-    success: false,
-  },
-  updating: false,
 };
 
-const elements = {
-  form: document.getElementById('rss-form'),
-  input: document.getElementById('rss-input'),
-  feedback: document.createElement('div'),
-  feedsContainer: document.getElementById('feeds'),
-  postsContainer: document.getElementById('posts'),
-};
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
 
-elements.input.after(elements.feedback);
+  const url = input.value.trim();
+  if (!url) return;
 
-initI18n().then((i18n) => {
-  configureYup(i18n);
+  // Simula agregar feed y post
+  const feed = { id: Date.now(), url, title: `Feed: ${url}` };
+  state.feeds.push(feed);
 
-  const watchedState = initView(state, elements, i18n);
+  const post = {
+    id: Date.now(),
+    feedId: feed.id,
+    title: `Post from ${url}`,
+    link: '#',
+  };
+  state.posts.push(post);
 
-  elements.form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const url = elements.input.value.trim();
-
-    const schema = buildSchema(state.feeds.map((f) => f.url));
-
-    schema.validate(url)
-      .then((validatedUrl) => {
-        const proxiedUrl = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(validatedUrl)}`;
-        return axios.get(proxiedUrl).then((response) => {
-          const { feed, posts } = parse(response.data.contents);
-
-          const feedId = uniqueId();
-          const newFeed = { id: feedId, url: validatedUrl, ...feed };
-          state.feeds.push(newFeed);
-
-          const normalizedPosts = posts.map((post) => ({
-            id: uniqueId(),
-            feedId,
-            ...post,
-          }));
-          state.posts.push(...normalizedPosts);
-
-          watchedState.form.error = null;
-          watchedState.form.success = true;
-
-          // Iniciar el loop de actualización
-          if (!state.updating) {
-            state.updating = true;
-            updateFeeds(state, watchedState);
-          }
-        });
-      })
-      .catch((err) => {
-        if (err.type === 'required') watchedState.form.error = 'required';
-        else if (err.type === 'notOneOf') watchedState.form.error = 'notOneOf';
-        else if (err.type === 'url') watchedState.form.error = 'url';
-        else watchedState.form.error = 'default';
-
-        watchedState.form.success = false;
-      });
-  });
+  render();
+  input.value = '';
 });
+
+function render() {
+  // Render feeds
+  feedsContainer.innerHTML = '';
+  state.feeds.forEach((feed) => {
+    const li = document.createElement('li');
+    li.textContent = feed.title;
+    feedsContainer.appendChild(li);
+  });
+
+  // Render posts
+  postsContainer.innerHTML = '';
+  state.posts.forEach((post) => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = post.link;
+    a.textContent = post.title;
+    li.appendChild(a);
+    postsContainer.appendChild(li);
+  });
+}
+
+console.log('RSS Reader initialized');

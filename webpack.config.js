@@ -1,4 +1,3 @@
-// webpack.config.js
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
@@ -24,11 +23,8 @@ export default {
   },
   devServer: {
     static: './dist',
-    // IMPORTANT: never open a browser in CI / headless runners.
-    // Keep it false to avoid webpack-dev-server trying to open a browser
-    // (which triggers wsl-utils and provoca el crash).
+    // Cambiamos `open: true` porque en CI con Playwright no hay navegador
     open: false,
-    port: 8080,
   },
   mode: 'development',
 };

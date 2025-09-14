@@ -1,16 +1,30 @@
-<!-- Modal -->
-<div class="modal fade" id="modal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body"></div>
-      <div class="modal-footer">
-        <a href="#" class="btn btn-primary full-article" target="_blank" rel="noopener noreferrer">Artículo completo</a>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-      </div>
-    </div>
-  </div>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RSS Reader</title>
+</head>
+<body>
+  <h1>RSS Reader</h1>
+
+  <form id="rss-form">
+    <input
+      type="text"
+      aria-label="url"
+      placeholder="Enter RSS URL"
+      required
+    />
+    <button type="submit">Add</button>
+  </form>
+
+  <section id="feeds">
+    <h2>Feeds</h2>
+    <ul></ul>
+  </section>
+
+  <section id="posts">
+    <h2>Posts</h2>
+    <ul></ul>
+  </section>
+</body>
+</html>
