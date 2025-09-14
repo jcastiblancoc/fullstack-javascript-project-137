@@ -6,7 +6,8 @@
   "scripts": {
     "start": "webpack serve --open",
     "build": "webpack",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "npx playwright test"
   },
   "repository": {
     "type": "git",
