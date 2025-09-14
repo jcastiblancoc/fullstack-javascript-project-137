@@ -1,7 +1,7 @@
 {
   "name": "@hexlet/code",
   "version": "1.0.0",
-  "description": "[![Actions Status](https://github.com/JavierQuinan/fullstack-javascript-project-137/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/JavierQuinan/fullstack-javascript-project-137/actions)",
+  "description": "[![Actions Status](https://github.com/jcastiblancoc/fullstack-javascript-project-137/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/jcastiblancoc/fullstack-javascript-project-137/actions)",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -14,15 +14,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JavierQuinan/fullstack-javascript-project-137.git"
+    "url": "git+https://github.com/jcastiblancoc/fullstack-javascript-project-137.git"
   },
   "keywords": [],
-  "author": "Javier Quinan",
+  "author": "Jeisson Castiblanco",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/JavierQuinan/fullstack-javascript-project-137/issues"
+    "url": "https://github.com/jcastiblancoc/fullstack-javascript-project-137/issues"
   },
-  "homepage": "https://github.com/JavierQuinan/fullstack-javascript-project-137#readme",
+  "homepage": "https://github.com/jcastiblancoc/fullstack-javascript-project-137#readme",
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "axios": "^1.7.7",
