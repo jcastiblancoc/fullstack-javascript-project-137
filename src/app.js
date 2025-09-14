@@ -1,57 +1,57 @@
-// src/app.js
-import axios from 'axios';
-import uniqueId from 'lodash.uniqueid';
-import initState from './state.js';
-import parse from './parser.js';
+import onChange from 'on-change';
+import i18next from 'i18next';
 
 export default () => {
+  const state = {
+    form: {
+      status: 'filling',
+      error: null,
+    },
+    feeds: [],
+    posts: [],
+  };
+
   const elements = {
-    form: document.querySelector('form'),
-    input: document.querySelector('input'),
-    feedsContainer: document.querySelector('.feeds'),
-    postsContainer: document.querySelector('.posts'),
+    form: document.querySelector('.rss-form'),
+    input: document.querySelector('#url-input'),
     feedback: document.querySelector('.feedback'),
-    modal: document.getElementById('modal'), // modal Bootstrap
-    modalTitle: document.querySelector('.modal-title'),
-    modalBody: document.querySelector('.modal-body'),
-    modalLink: document.querySelector('.full-article'),
   };
 
-  const state = initState(elements);
-
-  const getProxiedUrl = (url) => {
-    const proxy = 'https://allorigins.hexlet.app/get';
-    return `${proxy}?disableCache=true&url=${encodeURIComponent(url)}`;
+  // 👀 render para feedback
+  const render = (path, value) => {
+    if (path === 'form.error') {
+      if (value) {
+        elements.feedback.textContent = value;
+        elements.feedback.classList.add('text-danger');
+        elements.feedback.classList.remove('text-success');
+      } else {
+        elements.feedback.textContent = '';
+        elements.feedback.classList.remove('text-danger');
+      }
+    }
   };
 
+  const watchedState = onChange(state, render);
+
+  // 🚀 Validación y envío
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const feedUrl = elements.input.value.trim();
+    const formData = new FormData(e.target);
+    const url = formData.get('url').trim();
 
-    axios.get(getProxiedUrl(feedUrl))
-      .then((response) => {
-        const { feed, posts } = parse(response.data.contents);
+    // 🔥 Validar duplicado
+    if (watchedState.feeds.some((feed) => feed.url === url)) {
+      watchedState.form.error = 'RSS already exists';
+      return;
+    }
 
-        const feedId = uniqueId();
-        state.feeds = [...state.feeds, { id: feedId, ...feed, url: feedUrl }];
-
-        const normalizedPosts = posts.map((post) => ({
-          id: uniqueId(),
-          feedId,
-          ...post,
-        }));
-        state.posts = [...state.posts, ...normalizedPosts];
-
-        elements.input.value = '';
-        elements.input.focus();
-        state.error = null;
-      })
-      .catch((err) => {
-        if (err.message === 'parseError') {
-          state.error = 'El recurso no contiene un RSS válido';
-        } else {
-          state.error = 'Error de conexión. Intenta de nuevo.';
-        }
-      });
+    // ✅ Si no existe → agregar
+    watchedState.feeds.push({ url });
+    watchedState.form.error = null;
+    elements.feedback.textContent = 'RSS successfully added';
+    elements.feedback.classList.add('text-success');
+    elements.feedback.classList.remove('text-danger');
+    elements.form.reset();
+    elements.input.focus();
   });
 };
