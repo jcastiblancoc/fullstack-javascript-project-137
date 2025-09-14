@@ -23,7 +23,9 @@ export default {
   },
   devServer: {
     static: './dist',
-    open: true,
+    // Abrir navegador solo en local, no en CI (Hexlet/GitHub Actions)
+    open: process.env.CI ? false : true,
+    port: 8080,
   },
   mode: 'development',
 };
