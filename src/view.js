@@ -1,48 +1,51 @@
-// src/view.js
-const renderFeeds = (feedsContainer, feeds) => {
-  feedsContainer.innerHTML = '';
+import onChange from 'on-change';
 
+const renderFeeds = (container, feeds) => {
+  container.innerHTML = '<h2>Feeds</h2>';
   const ul = document.createElement('ul');
-  ul.classList.add('list-group', 'mb-3');
-
   feeds.forEach(({ title, description }) => {
     const li = document.createElement('li');
-    li.classList.add('list-group-item');
-
-    const h3 = document.createElement('h3');
-    h3.textContent = title;
-
-    const p = document.createElement('p');
-    p.textContent = description;
-
-    li.append(h3, p);
+    li.innerHTML = `<strong>${title}</strong><br>${description}`;
     ul.appendChild(li);
   });
-
-  feedsContainer.appendChild(ul);
+  container.appendChild(ul);
 };
 
-const renderPosts = (postsContainer, posts) => {
-  postsContainer.innerHTML = '';
-
+const renderPosts = (container, posts) => {
+  container.innerHTML = '<h2>Posts</h2>';
   const ul = document.createElement('ul');
-  ul.classList.add('list-group');
-
   posts.forEach(({ title, link }) => {
     const li = document.createElement('li');
-    li.classList.add('list-group-item');
-
     const a = document.createElement('a');
     a.href = link;
-    a.textContent = title;
     a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-
+    a.textContent = title;
     li.appendChild(a);
     ul.appendChild(li);
   });
-
-  postsContainer.appendChild(ul);
+  container.appendChild(ul);
 };
 
-export { renderFeeds, renderPosts };
+export default (state, elements, i18n) => onChange(state, (path) => {
+  if (path === 'form.error') {
+    elements.feedback.textContent = state.form.error
+      ? i18n.t(`errors.${state.form.error}`)
+      : '';
+    elements.input.classList.toggle('is-invalid', !!state.form.error);
+  }
+
+  if (path === 'form.success' && state.form.success) {
+    elements.input.value = '';
+    elements.input.focus();
+    elements.feedback.textContent = i18n.t('success');
+    elements.input.classList.remove('is-invalid');
+  }
+
+  if (path === 'feeds') {
+    renderFeeds(elements.feedsContainer, state.feeds);
+  }
+
+  if (path === 'posts') {
+    renderPosts(elements.postsContainer, state.posts);
+  }
+});
