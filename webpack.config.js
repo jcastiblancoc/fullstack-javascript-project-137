@@ -1,3 +1,4 @@
+// webpack.config.js
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
@@ -23,8 +24,10 @@ export default {
   },
   devServer: {
     static: './dist',
-    // Abrir navegador solo en local, no en CI (Hexlet/GitHub Actions)
-    open: process.env.CI ? false : true,
+    // IMPORTANT: never open a browser in CI / headless runners.
+    // Keep it false to avoid webpack-dev-server trying to open a browser
+    // (which triggers wsl-utils and provoca el crash).
+    open: false,
     port: 8080,
   },
   mode: 'development',
