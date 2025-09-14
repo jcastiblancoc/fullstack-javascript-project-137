@@ -1,28 +1,25 @@
-// src/app.js
 import onChange from 'on-change';
 import render from './render.js';
-import { buildSchema } from './validation.js';
+import { configureYup, buildSchema } from './validation.js';
+import i18next from 'i18next';
+import i18nInstance from './i18n.js';
 
-export default () => {
+// Inicializar i18n
+i18nInstance().then((i18n) => {
+  configureYup(i18n);
+
   const elements = {
     form: document.querySelector('.rss-form'),
     input: document.querySelector('#url-input'),
     feedback: document.querySelector('.feedback'),
-    submit: document.querySelector('button[type="submit"]'),
-    feedsContainer: document.querySelector('.feeds-container'),
-    postsContainer: document.querySelector('.posts-container'),
-    modal: {
-      title: document.querySelector('.modal-title'),
-      body: document.querySelector('.modal-body'),
-      link: document.querySelector('.modal-link'),
-    },
   };
 
   const state = {
     feeds: [],
-    posts: [],
-    form: { error: null, success: null },
-    ui: { modal: {}, seenPosts: new Set() },
+    form: {
+      error: null,
+      success: null,
+    },
   };
 
   const watchedState = onChange(state, render(elements));
@@ -30,7 +27,8 @@ export default () => {
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     const url = elements.input.value.trim();
-    const schema = buildSchema(watchedState.feeds.map((f) => f.url));
+
+    const schema = buildSchema(watchedState.feeds.map((feed) => feed.url));
 
     schema.validate(url)
       .then(() => {
@@ -64,4 +62,4 @@ export default () => {
         watchedState.form.success = null;
       });
   });
-};
+});

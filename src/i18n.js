@@ -6,7 +6,7 @@ export default () => {
   const i18n = i18next.createInstance();
 
   return i18n.init({
-    lng: 'es', // idioma inicial
+    lng: 'es',
     debug: false,
     resources: {
       es,
