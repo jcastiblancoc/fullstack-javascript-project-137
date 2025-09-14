@@ -11,18 +11,18 @@ const updateFeeds = (state, watchedState) => {
       .then((response) => {
         const { posts } = parse(response.data.contents);
 
-        const existingLinks = state.posts.map((post) => post.link);
+        const existingLinks = watchedState.posts.map((post) => post.link);
 
         const newPosts = posts
           .filter((post) => !existingLinks.includes(post.link))
           .map((post) => ({
-            id: uniqueId(),
+            id: uniqueId(`${feed.id}-`),
             feedId: feed.id,
             ...post,
           }));
 
         if (newPosts.length > 0) {
-          watchedState.posts.unshift(...newPosts);
+          watchedState.posts = [...newPosts, ...watchedState.posts];
         }
       })
       .catch((err) => {

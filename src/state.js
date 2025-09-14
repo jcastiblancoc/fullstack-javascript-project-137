@@ -19,25 +19,33 @@ export default (elements) => {
   };
 
   const watchedState = onChange(state, (path, value) => {
-    if (path === 'feeds') {
-      renderFeeds(elements.feedsContainer, value);
-    }
+    switch (path) {
+      case 'feeds':
+        renderFeeds(elements.feedsContainer, value);
+        break;
 
-    if (path === 'posts') {
-      renderPosts(elements.postsContainer, value, watchedState);
-    }
+      case 'posts':
+        renderPosts(elements.postsContainer, value, watchedState);
+        break;
 
-    if (path === 'error') {
-      elements.feedback.textContent = value;
-      elements.feedback.classList.add('text-danger');
-    }
+      case 'error':
+        elements.feedback.textContent = value ?? '';
+        elements.feedback.classList.remove('text-success');
+        if (value) {
+          elements.feedback.classList.add('text-danger');
+        }
+        break;
 
-    if (path === 'ui.modal') {
-      renderModal(watchedState, elements);
-    }
+      case 'ui.modal':
+        renderModal(watchedState, elements);
+        break;
 
-    if (path === 'ui.seenPosts') {
-      renderPosts(elements.postsContainer, state.posts, watchedState);
+      case 'ui.seenPosts':
+        renderPosts(elements.postsContainer, state.posts, watchedState);
+        break;
+
+      default:
+        break;
     }
   });
 

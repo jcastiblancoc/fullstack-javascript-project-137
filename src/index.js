@@ -17,6 +17,12 @@ form.addEventListener('submit', (e) => {
   const url = input.value.trim();
   if (!url) return;
 
+  // 🚨 Validación simple para detectar repetidos
+  if (state.feeds.some((f) => f.url === url)) {
+    showFeedback('RSS already exists', 'error');
+    return;
+  }
+
   const feed = { id: Date.now(), url, title: `Feed: ${url}` };
   state.feeds.push(feed);
 
@@ -58,9 +64,13 @@ function render() {
 
 function showFeedback(message, type = 'success') {
   feedback.textContent = message;
-  feedback.style.color = type === 'success' ? 'green' : 'red';
-  feedback.style.margin = '10px 0';
-  feedback.style.fontWeight = 'bold';
+  feedback.classList.remove('text-success', 'text-danger');
+
+  if (type === 'success') {
+    feedback.classList.add('text-success');
+  } else {
+    feedback.classList.add('text-danger');
+  }
 }
 
 console.log('RSS Reader initialized');

@@ -1,6 +1,11 @@
 // src/app.js
 import onChange from 'on-change';
 import render from './render.js';
+import { configureYup, buildSchema } from './validation.js';
+import i18next from 'i18next';
+
+// Configura mensajes de validación
+configureYup(i18next);
 
 export default () => {
   const elements = {
@@ -24,22 +29,20 @@ export default () => {
     e.preventDefault();
     const url = elements.input.value.trim();
 
-    // Validación: campo vacío
-    if (url === '') {
-      watchedState.form.error = 'URL is required';
-      return;
-    }
+    const schema = buildSchema(watchedState.feeds.map((feed) => feed.url));
 
-    // Validación: duplicado
-    if (watchedState.feeds.some((feed) => feed.url === url)) {
-      watchedState.form.error = 'RSS already exists'; // 👈 EXACTO
-      return;
-    }
-
-    // Si pasa validaciones, simulamos añadir feed
-    watchedState.feeds.push({ url });
-    watchedState.form.error = null;
-    watchedState.form.success = 'RSS has been loaded';
-    elements.form.reset();
+    schema.validate(url)
+      .then(() => {
+        // Si pasa validación, añadir feed
+        watchedState.feeds.push({ url });
+        watchedState.form.success = 'RSS has been loaded';
+        watchedState.form.error = null;
+        elements.form.reset();
+      })
+      .catch((err) => {
+        // Si hay error de validación, mostrarlo
+        watchedState.form.error = err.message;
+        watchedState.form.success = null;
+      });
   });
 };

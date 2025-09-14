@@ -30,7 +30,7 @@ export const renderFeeds = (container, feeds) => {
 
     const feedDesc = document.createElement('p');
     feedDesc.classList.add('m-0', 'small', 'text-black-50');
-    feedDesc.textContent = feed.description;
+    feedDesc.textContent = feed.description || '';
 
     li.append(feedTitle, feedDesc);
     list.append(li);
@@ -95,7 +95,7 @@ export const renderPosts = (container, posts, state) => {
       state.ui.seenPosts.add(post.id);
       state.ui.modal = {
         title: post.title,
-        description: post.description,
+        description: post.description || '',
         link: post.link,
       };
     });
@@ -108,31 +108,34 @@ export const renderPosts = (container, posts, state) => {
   container.append(card);
 };
 
-// 👇 Nuevo: initView como export default
-const initView = (state, elements, i18n) => onChange(state, (path, value) => {
-  if (path === 'feeds') {
-    renderFeeds(elements.feedsContainer, value);
-  }
-  if (path === 'posts') {
-    renderPosts(elements.postsContainer, value, state);
-  }
-  if (path === 'form.error') {
-    elements.feedback.textContent = i18n.t(`errors.${value}`);
-    elements.feedback.classList.add('text-danger');
-  }
-  if (path === 'form.success') {
-    if (value) {
-      elements.feedback.textContent = i18n.t('success');
+const initView = (state, elements) => onChange(state, (path, value) => {
+  switch (path) {
+    case 'feeds':
+      renderFeeds(elements.feedsContainer, value);
+      break;
+    case 'posts':
+      renderPosts(elements.postsContainer, value, state);
+      break;
+    case 'form.error':
+      elements.feedback.textContent = value;
+      elements.feedback.classList.remove('text-success');
+      elements.feedback.classList.add('text-danger');
+      break;
+    case 'form.success':
+      elements.feedback.textContent = value;
+      elements.feedback.classList.remove('text-danger');
       elements.feedback.classList.add('text-success');
       elements.input.value = '';
       elements.input.focus();
-    }
-  }
-  if (path === 'ui.modal') {
-    const { title, description, link } = value;
-    elements.modal.title.textContent = title;
-    elements.modal.body.textContent = description;
-    elements.modal.link.setAttribute('href', link);
+      break;
+    case 'ui.modal':
+      const { title, description, link } = value;
+      elements.modal.title.textContent = title;
+      elements.modal.body.textContent = description;
+      elements.modal.link.setAttribute('href', link);
+      break;
+    default:
+      break;
   }
 });
 
