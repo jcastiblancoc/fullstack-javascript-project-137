@@ -1,4 +1,5 @@
 // src/view.js
+import onChange from 'on-change';
 
 export const renderFeeds = (container, feeds) => {
   container.innerHTML = '';
@@ -106,3 +107,33 @@ export const renderPosts = (container, posts, state) => {
   card.append(list);
   container.append(card);
 };
+
+// 👇 Nuevo: initView como export default
+const initView = (state, elements, i18n) => onChange(state, (path, value) => {
+  if (path === 'feeds') {
+    renderFeeds(elements.feedsContainer, value);
+  }
+  if (path === 'posts') {
+    renderPosts(elements.postsContainer, value, state);
+  }
+  if (path === 'form.error') {
+    elements.feedback.textContent = i18n.t(`errors.${value}`);
+    elements.feedback.classList.add('text-danger');
+  }
+  if (path === 'form.success') {
+    if (value) {
+      elements.feedback.textContent = i18n.t('success');
+      elements.feedback.classList.add('text-success');
+      elements.input.value = '';
+      elements.input.focus();
+    }
+  }
+  if (path === 'ui.modal') {
+    const { title, description, link } = value;
+    elements.modal.title.textContent = title;
+    elements.modal.body.textContent = description;
+    elements.modal.link.setAttribute('href', link);
+  }
+});
+
+export default initView;
